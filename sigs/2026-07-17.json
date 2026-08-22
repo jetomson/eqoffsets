@@ -1,0 +1,1216 @@
+{
+  "meta": {
+    "source_binary": "binaries/2026-07-17/eqgame.exe",
+    "sha256": "6f3c4ff56abf0decf3c5d6cea2926ec98ad97af0f4fd170aae367ee9c6a56db8",
+    "image_base": "0x140000000",
+    "built_utc": "2026-08-21T23:19:43",
+    "patch_date": "07/17/2026"
+  },
+  "offsets": {
+    "ZoneAddr": {
+      "known_value": "0x140EB78F4",
+      "signatures": [
+        {
+          "pattern": "8D 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 8B 84 24 E0 01 00 00 48 83 C0 41",
+          "extract": "rip_target",
+          "disp_off": 2,
+          "insn_len": 6,
+          "site_va": "0x1401FBF55",
+          "insn": "lea ecx, [rip + 0xcbb999]",
+          "string_anchor": null,
+          "length": 23,
+          "wildcards": 8,
+          "anchor_len": 12,
+          "score": 13.593,
+          "id": "ZoneAddr#0"
+        },
+        {
+          "pattern": "89 1D ?? ?? ?? ?? 48 8B 01 FF 50 08",
+          "extract": "rip_target",
+          "disp_off": 2,
+          "insn_len": 6,
+          "site_va": "0x1401B0151",
+          "insn": "mov dword ptr [rip + 0xd0779d], ebx",
+          "string_anchor": null,
+          "length": 12,
+          "wildcards": 4,
+          "anchor_len": 6,
+          "score": 3.533,
+          "id": "ZoneAddr#1"
+        },
+        {
+          "pattern": "8D 0D ?? ?? ?? ?? 48 8B D7 E8 ?? ?? ?? ?? 48 8D 8B D8 54 00 00",
+          "extract": "rip_target",
+          "disp_off": 2,
+          "insn_len": 6,
+          "site_va": "0x1401AD0A4",
+          "insn": "lea ecx, [rip + 0xd0a84a]",
+          "string_anchor": null,
+          "length": 21,
+          "wildcards": 8,
+          "anchor_len": 7,
+          "score": 3.231,
+          "id": "ZoneAddr#2"
+        },
+        {
+          "pattern": "8D 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 8D 8B D8 54 00 00",
+          "extract": "rip_target",
+          "disp_off": 2,
+          "insn_len": 6,
+          "site_va": "0x1401A42FF",
+          "insn": "lea ecx, [rip + 0xd135ef]",
+          "string_anchor": null,
+          "length": 18,
+          "wildcards": 8,
+          "anchor_len": 7,
+          "score": 2.411,
+          "id": "ZoneAddr#3"
+        },
+        {
+          "pattern": "8D 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 8D 8F D8 54 00 00",
+          "extract": "rip_target",
+          "disp_off": 2,
+          "insn_len": 6,
+          "site_va": "0x1401B016B",
+          "insn": "lea ecx, [rip + 0xd07783]",
+          "string_anchor": null,
+          "length": 18,
+          "wildcards": 8,
+          "anchor_len": 7,
+          "score": 2.411,
+          "id": "ZoneAddr#4"
+        }
+      ]
+    },
+    "SpawnHeaderAddr": {
+      "known_value": "0x140F2E888",
+      "signatures": [
+        {
+          "pattern": "8B 0D ?? ?? ?? ?? 48 8B 01 41 8B 56 04 FF 50 10 4C 8B F8",
+          "extract": "rip_target",
+          "disp_off": 2,
+          "insn_len": 6,
+          "site_va": "0x140140DD6",
+          "insn": "mov ecx, dword ptr [rip + 0xdedaac]",
+          "string_anchor": null,
+          "length": 19,
+          "wildcards": 4,
+          "anchor_len": 13,
+          "score": 18.939,
+          "id": "SpawnHeaderAddr#0"
+        },
+        {
+          "pattern": "8B 0D ?? ?? ?? ?? 48 8B 01 41 8B 56 04 FF 50 10 48 8B F0",
+          "extract": "rip_target",
+          "disp_off": 2,
+          "insn_len": 6,
+          "site_va": "0x140140E84",
+          "insn": "mov ecx, dword ptr [rip + 0xded9fe]",
+          "string_anchor": null,
+          "length": 19,
+          "wildcards": 4,
+          "anchor_len": 13,
+          "score": 18.939,
+          "id": "SpawnHeaderAddr#1"
+        },
+        {
+          "pattern": "8B 0D ?? ?? ?? ?? 48 8B 01 FF 50 10 48 8B D8 48 85 C0 74 ?? 48 8B C8",
+          "extract": "rip_target",
+          "disp_off": 2,
+          "insn_len": 6,
+          "site_va": "0x1400EC0CC",
+          "insn": "mov ecx, dword ptr [rip + 0xe427b6]",
+          "string_anchor": null,
+          "length": 23,
+          "wildcards": 5,
+          "anchor_len": 13,
+          "score": 18.202,
+          "id": "SpawnHeaderAddr#2"
+        },
+        {
+          "pattern": "8B 0D ?? ?? ?? ?? 48 8B 01 41 8B 50 04 FF 50 10 48 85 C0 0F 84 ?? ?? ?? ?? 48 83 3D ?? ?? ?? ?? 00",
+          "extract": "rip_target",
+          "disp_off": 2,
+          "insn_len": 6,
+          "site_va": "0x1400C7037",
+          "insn": "mov ecx, dword ptr [rip + 0xe6784b]",
+          "string_anchor": null,
+          "length": 33,
+          "wildcards": 12,
+          "anchor_len": 15,
+          "score": 17.777,
+          "id": "SpawnHeaderAddr#3"
+        },
+        {
+          "pattern": "8B 0D ?? ?? ?? ?? 48 8B 01 FF 50 08 48 85 C0 48 8B D8",
+          "extract": "rip_target",
+          "disp_off": 2,
+          "insn_len": 6,
+          "site_va": "0x14017B91F",
+          "insn": "mov ecx, dword ptr [rip + 0xdb2f63]",
+          "string_anchor": null,
+          "length": 18,
+          "wildcards": 4,
+          "anchor_len": 12,
+          "score": 16.856,
+          "id": "SpawnHeaderAddr#4"
+        }
+      ]
+    },
+    "CharInfo": {
+      "known_value": "0x140EB1D08",
+      "signatures": [
+        {
+          "pattern": "8B 05 ?? ?? ?? ?? 48 85 C0 74 ?? C7 80 64 02 00 00 BE 00 00 00 48 8B 8F 78 03 00 00",
+          "extract": "rip_target",
+          "disp_off": 2,
+          "insn_len": 6,
+          "site_va": "0x1400D6A51",
+          "insn": "mov eax, dword ptr [rip + 0xddb2b1]",
+          "string_anchor": null,
+          "length": 28,
+          "wildcards": 5,
+          "anchor_len": 17,
+          "score": 24.229,
+          "id": "CharInfo#0"
+        },
+        {
+          "pattern": "8B 05 ?? ?? ?? ?? 48 85 C0 74 ?? C7 80 64 02 00 00 BE 00 00 00 48 8B 8B 78 03 00 00",
+          "extract": "rip_target",
+          "disp_off": 2,
+          "insn_len": 6,
+          "site_va": "0x1400D8749",
+          "insn": "mov eax, dword ptr [rip + 0xdd95b9]",
+          "string_anchor": null,
+          "length": 28,
+          "wildcards": 5,
+          "anchor_len": 17,
+          "score": 24.229,
+          "id": "CharInfo#1"
+        },
+        {
+          "pattern": "8B 05 ?? ?? ?? ?? 48 8B B8 50 02 00 00 48 8B B0 60 01 00 00",
+          "extract": "rip_target",
+          "disp_off": 2,
+          "insn_len": 6,
+          "site_va": "0x1400C9C6B",
+          "insn": "mov eax, dword ptr [rip + 0xde8097]",
+          "string_anchor": null,
+          "length": 20,
+          "wildcards": 4,
+          "anchor_len": 14,
+          "score": 21.0,
+          "id": "CharInfo#2"
+        },
+        {
+          "pattern": "8B 0D ?? ?? ?? ?? 48 8B 01 FF 90 C0 01 00 00 45 33 F6",
+          "extract": "rip_target",
+          "disp_off": 2,
+          "insn_len": 6,
+          "site_va": "0x1400CD554",
+          "insn": "mov ecx, dword ptr [rip + 0xde47ae]",
+          "string_anchor": null,
+          "length": 18,
+          "wildcards": 4,
+          "anchor_len": 12,
+          "score": 16.856,
+          "id": "CharInfo#3"
+        },
+        {
+          "pattern": "8B 0D ?? ?? ?? ?? 48 8B 01 FF 90 C0 01 00 00 84 C0 74 ?? 48 8B D3",
+          "extract": "rip_target",
+          "disp_off": 2,
+          "insn_len": 6,
+          "site_va": "0x1400CCF39",
+          "insn": "mov ecx, dword ptr [rip + 0xde4dc9]",
+          "string_anchor": null,
+          "length": 22,
+          "wildcards": 5,
+          "anchor_len": 12,
+          "score": 16.155,
+          "id": "CharInfo#4"
+        }
+      ]
+    },
+    "TargetAddr": {
+      "known_value": "0x140DE3B50",
+      "signatures": [
+        {
+          "pattern": "89 15 ?? ?? ?? ?? 48 39 35 ?? ?? ?? ?? 74 ?? 45 33 C0 BA E2 12 00 00",
+          "extract": "rip_target",
+          "disp_off": 2,
+          "insn_len": 6,
+          "site_va": "0x1400F3DAC",
+          "insn": "mov dword ptr [rip + 0xcefd9e], edx",
+          "string_anchor": null,
+          "length": 23,
+          "wildcards": 9,
+          "anchor_len": 8,
+          "score": 4.724,
+          "id": "TargetAddr#0"
+        },
+        {
+          "pattern": "3B 15 ?? ?? ?? ?? 0F 84 ?? ?? ?? ?? 48 85 D2 0F 84 ?? ?? ?? ??",
+          "extract": "rip_target",
+          "disp_off": 2,
+          "insn_len": 6,
+          "site_va": "0x1400F3BA9",
+          "insn": "cmp edx, dword ptr [rip + 0xceffa1]",
+          "string_anchor": null,
+          "length": 21,
+          "wildcards": 12,
+          "anchor_len": 5,
+          "score": -4.579,
+          "id": "TargetAddr#1"
+        },
+        {
+          "pattern": "3B 15 ?? ?? ?? ?? 0F 84 ?? ?? ?? ?? 48 85 D2 74 ??",
+          "extract": "rip_target",
+          "disp_off": 2,
+          "insn_len": 6,
+          "site_va": "0x1400F3D3E",
+          "insn": "cmp edx, dword ptr [rip + 0xcefe0c]",
+          "string_anchor": null,
+          "length": 17,
+          "wildcards": 9,
+          "anchor_len": 4,
+          "score": -5.138,
+          "id": "TargetAddr#2"
+        }
+      ]
+    },
+    "ItemsAddr": {
+      "known_value": "0x140EAEB80",
+      "signatures": [
+        {
+          "pattern": "8D 05 ?? ?? ?? ?? 48 83 C4 28 C3 CC CC CC CC 48 89 5C 24 08 57 48 83 EC 20 48 8B F9",
+          "extract": "rip_target",
+          "disp_off": 2,
+          "insn_len": 6,
+          "site_va": "0x14022E1D1",
+          "insn": "lea eax, [rip + 0xc809a9]",
+          "string_anchor": null,
+          "length": 28,
+          "wildcards": 4,
+          "anchor_len": 22,
+          "score": 24.943,
+          "id": "ItemsAddr#0"
+        },
+        {
+          "pattern": "89 05 ?? ?? ?? ?? 48 8B 0B 48 85 C9 74 ?? 48 8B 43 08 48 89 41 08 48 8B 4B 08 48 85 C9 74 ?? 48 8B 03 48 89 01 48 8B 53 30",
+          "extract": "rip_target",
+          "disp_off": 2,
+          "insn_len": 6,
+          "site_va": "0x1408450E5",
+          "insn": "mov dword ptr [rip + 0x669a95], eax",
+          "string_anchor": null,
+          "length": 41,
+          "wildcards": 6,
+          "anchor_len": 16,
+          "score": 22.923,
+          "id": "ItemsAddr#1"
+        },
+        {
+          "pattern": "8B 1D ?? ?? ?? ?? 48 85 DB 0F 84 ?? ?? ?? ?? 66 0F 1F 44 00 00",
+          "extract": "rip_target",
+          "disp_off": 2,
+          "insn_len": 6,
+          "site_va": "0x1408450CB",
+          "insn": "mov ebx, dword ptr [rip + 0x669aaf]",
+          "string_anchor": null,
+          "length": 21,
+          "wildcards": 8,
+          "anchor_len": 6,
+          "score": 1.231,
+          "id": "ItemsAddr#2"
+        },
+        {
+          "pattern": "8B 1D ?? ?? ?? ?? 48 85 DB 0F 85 ?? ?? ?? ?? 48 8B 5C 24 30",
+          "extract": "rip_target",
+          "disp_off": 2,
+          "insn_len": 6,
+          "site_va": "0x140845166",
+          "insn": "mov ebx, dword ptr [rip + 0x669a14]",
+          "string_anchor": null,
+          "length": 20,
+          "wildcards": 8,
+          "anchor_len": 5,
+          "score": -1.0,
+          "id": "ItemsAddr#3"
+        }
+      ]
+    },
+    "WorldAddr": {
+      "known_value": "0x140EB1A40",
+      "signatures": [
+        {
+          "pattern": "8B 05 ?? ?? ?? ?? 4C 8B 44 C8 30 4D 85 C0 74 ?? 49 83 C0 10 48 8D 15 ?? ?? ?? ??",
+          "extract": "rip_target",
+          "disp_off": 2,
+          "insn_len": 6,
+          "site_va": "0x1401AE0D0",
+          "insn": "mov eax, dword ptr [rip + 0xd0396a]",
+          "string_anchor": "%s_EnvironmentEmitters.txt",
+          "length": 27,
+          "wildcards": 9,
+          "anchor_len": 9,
+          "score": 32.283,
+          "id": "WorldAddr#0"
+        },
+        {
+          "pattern": "8B 05 ?? ?? ?? ?? 48 63 C9 48 8B 54 C8 30 81 7A 0C BC 00 00 00",
+          "extract": "rip_target",
+          "disp_off": 2,
+          "insn_len": 6,
+          "site_va": "0x140198501",
+          "insn": "mov eax, dword ptr [rip + 0xd19539]",
+          "string_anchor": null,
+          "length": 21,
+          "wildcards": 4,
+          "anchor_len": 15,
+          "score": 23.04,
+          "id": "WorldAddr#1"
+        },
+        {
+          "pattern": "8B 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 89 7C 24 50 48 89 7C 24 48 48 89 7C 24 40 48 89 7C 24 38 48 89 7C 24 30 48 89 7C 24 28 48 89 7C 24 20 45 33 C9 4C 8D 84 24 90 00 00 00",
+          "extract": "rip_target",
+          "disp_off": 2,
+          "insn_len": 6,
+          "site_va": "0x140180064",
+          "insn": "mov ecx, dword ptr [rip + 0xd319d6]",
+          "string_anchor": null,
+          "length": 57,
+          "wildcards": 8,
+          "anchor_len": 46,
+          "score": 20.643,
+          "id": "WorldAddr#2"
+        },
+        {
+          "pattern": "8B 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 8B 4F 08 48 63 51 04 39 84 3A CC 01 00 00",
+          "extract": "rip_target",
+          "disp_off": 2,
+          "insn_len": 6,
+          "site_va": "0x1400E3861",
+          "insn": "mov ecx, dword ptr [rip + 0xdce1d9]",
+          "string_anchor": null,
+          "length": 26,
+          "wildcards": 8,
+          "anchor_len": 15,
+          "score": 19.946,
+          "id": "WorldAddr#3"
+        },
+        {
+          "pattern": "8B 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? 83 F8 06 0F 85 ?? ?? ?? ?? F2 0F 10 05 ?? ?? ?? ??",
+          "extract": "rip_target",
+          "disp_off": 2,
+          "insn_len": 6,
+          "site_va": "0x1401AE434",
+          "insn": "mov ecx, dword ptr [rip + 0xd03606]",
+          "string_anchor": "OBEQUIP_LEXIT",
+          "length": 28,
+          "wildcards": 16,
+          "anchor_len": 5,
+          "score": 19.371,
+          "id": "WorldAddr#4"
+        }
+      ]
+    }
+  },
+  "struct_offsets": {
+    "SpawnInfo Offsets::LastnameOffset": {
+      "section": "SpawnInfo Offsets",
+      "field": "LastnameOffset",
+      "known_value": "0x48",
+      "signatures": []
+    },
+    "SpawnInfo Offsets::XOffset": {
+      "section": "SpawnInfo Offsets",
+      "field": "XOffset",
+      "known_value": "0x74",
+      "signatures": []
+    },
+    "SpawnInfo Offsets::YOffset": {
+      "section": "SpawnInfo Offsets",
+      "field": "YOffset",
+      "known_value": "0x78",
+      "signatures": []
+    },
+    "SpawnInfo Offsets::ZOffset": {
+      "section": "SpawnInfo Offsets",
+      "field": "ZOffset",
+      "known_value": "0x7C",
+      "signatures": []
+    },
+    "SpawnInfo Offsets::SpeedOffset": {
+      "section": "SpawnInfo Offsets",
+      "field": "SpeedOffset",
+      "known_value": "0x8C",
+      "signatures": [
+        {
+          "pattern": "0F B6 83 ?? ?? ?? ?? 41 88 84 24 8C 00 00 00",
+          "extract": "insn_disp",
+          "disp_off": 3,
+          "disp_size": 4,
+          "site_va": "0x1400A96FC",
+          "insn": "movzx eax, byte ptr [rbx + 0x8c]",
+          "length": 15,
+          "wildcards": 4,
+          "anchor_len": 8,
+          "score": 8.417,
+          "id": "SpeedOffset#0"
+        }
+      ]
+    },
+    "SpawnInfo Offsets::HeadingOffset": {
+      "section": "SpawnInfo Offsets",
+      "field": "HeadingOffset",
+      "known_value": "0x90",
+      "signatures": []
+    },
+    "SpawnInfo Offsets::NameOffset": {
+      "section": "SpawnInfo Offsets",
+      "field": "NameOffset",
+      "known_value": "0xB4",
+      "signatures": [
+        {
+          "pattern": "48 8D 98 ?? ?? ?? ?? 48 8B 01 FF 90 B0 00 00 00",
+          "extract": "insn_disp",
+          "disp_off": 3,
+          "disp_size": 4,
+          "site_va": "0x1400DF35E",
+          "insn": "lea rbx, [rax + 0xb4]",
+          "length": 16,
+          "wildcards": 4,
+          "anchor_len": 9,
+          "score": 10.6,
+          "id": "NameOffset#0"
+        },
+        {
+          "pattern": "48 8D 93 ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 89 74 24 50 48 8D 4C 24 70",
+          "extract": "insn_disp",
+          "disp_off": 3,
+          "disp_size": 4,
+          "site_va": "0x14019600A",
+          "insn": "lea rdx, [rbx + 0xb4]",
+          "length": 22,
+          "wildcards": 8,
+          "anchor_len": 10,
+          "score": 9.427,
+          "id": "NameOffset#1"
+        },
+        {
+          "pattern": "4C 8D BB ?? ?? ?? ?? 49 8B CF 48 8D 55 90",
+          "extract": "insn_disp",
+          "disp_off": 3,
+          "disp_size": 4,
+          "site_va": "0x14017B9BB",
+          "insn": "lea r15, [rbx + 0xb4]",
+          "length": 14,
+          "wildcards": 4,
+          "anchor_len": 7,
+          "score": 6.186,
+          "id": "NameOffset#2"
+        },
+        {
+          "pattern": "8B 81 ?? ?? ?? ?? 89 45 D7 48 89 5D EF",
+          "extract": "insn_disp",
+          "disp_off": 2,
+          "disp_size": 4,
+          "site_va": "0x140150BEC",
+          "insn": "mov eax, dword ptr [rcx + 0xb4]",
+          "length": 13,
+          "wildcards": 4,
+          "anchor_len": 7,
+          "score": 5.896,
+          "id": "NameOffset#3"
+        },
+        {
+          "pattern": "48 8D 93 ?? ?? ?? ?? E8 ?? ?? ?? ?? 4C 8B C0 BA FD 04 00 00",
+          "extract": "insn_disp",
+          "disp_off": 3,
+          "disp_size": 4,
+          "site_va": "0x1401AD787",
+          "insn": "lea rdx, [rbx + 0xb4]",
+          "length": 20,
+          "wildcards": 8,
+          "anchor_len": 8,
+          "score": 5.0,
+          "id": "NameOffset#4"
+        }
+      ]
+    },
+    "SpawnInfo Offsets::TypeOffset": {
+      "section": "SpawnInfo Offsets",
+      "field": "TypeOffset",
+      "known_value": "0x135",
+      "signatures": [
+        {
+          "pattern": "80 B8 ?? ?? ?? ?? 00 75 ?? 49 8B 46 08 48 63 48 04 42 80 BC 31 C8 01 00 00 01",
+          "extract": "insn_disp",
+          "disp_off": 2,
+          "disp_size": 4,
+          "site_va": "0x1400DD357",
+          "insn": "cmp byte ptr [rax + 0x135], 0",
+          "length": 26,
+          "wildcards": 5,
+          "anchor_len": 17,
+          "score": 24.254,
+          "id": "TypeOffset#0"
+        },
+        {
+          "pattern": "80 B8 ?? ?? ?? ?? 00 75 ?? 49 8B 46 08 48 63 48 04 46 89 AC 31 C0 02 00 00",
+          "extract": "insn_disp",
+          "disp_off": 2,
+          "disp_size": 4,
+          "site_va": "0x1400DDE1E",
+          "insn": "cmp byte ptr [rax + 0x135], 0",
+          "length": 25,
+          "wildcards": 5,
+          "anchor_len": 16,
+          "score": 24.25,
+          "id": "TypeOffset#1"
+        },
+        {
+          "pattern": "80 B8 ?? ?? ?? ?? 00 75 ?? 48 8B 43 08 48 63 48 04 8B 94 19 CC 01 00 00",
+          "extract": "insn_disp",
+          "disp_off": 2,
+          "disp_size": 4,
+          "site_va": "0x1400E8E10",
+          "insn": "cmp byte ptr [rax + 0x135], 0",
+          "length": 24,
+          "wildcards": 5,
+          "anchor_len": 15,
+          "score": 22.233,
+          "id": "TypeOffset#2"
+        },
+        {
+          "pattern": "80 B8 ?? ?? ?? ?? 00 0F 85 ?? ?? ?? ?? 48 8B 47 08 48 63 48 04 48 83 C1 08 48 03 CF 48 8B 01 FF 90 B0 00 00 00 48 8B F0",
+          "extract": "insn_disp",
+          "disp_off": 2,
+          "disp_size": 4,
+          "site_va": "0x1400E3513",
+          "insn": "cmp byte ptr [rax + 0x135], 0",
+          "length": 40,
+          "wildcards": 8,
+          "anchor_len": 27,
+          "score": 22.0,
+          "id": "TypeOffset#3"
+        },
+        {
+          "pattern": "80 B8 ?? ?? ?? ?? 00 0F 85 ?? ?? ?? ?? 48 8B 47 08 48 63 48 04 48 83 C1 08 48 03 CF 48 8B 01 FF 90 B0 00 00 00 48 8B D0",
+          "extract": "insn_disp",
+          "disp_off": 2,
+          "disp_size": 4,
+          "site_va": "0x1400E36F2",
+          "insn": "cmp byte ptr [rax + 0x135], 0",
+          "length": 40,
+          "wildcards": 8,
+          "anchor_len": 27,
+          "score": 22.0,
+          "id": "TypeOffset#4"
+        }
+      ]
+    },
+    "SpawnInfo Offsets::SpawnIDOffset": {
+      "section": "SpawnInfo Offsets",
+      "field": "SpawnIDOffset",
+      "known_value": "0x168",
+      "signatures": [
+        {
+          "pattern": "8B 80 ?? ?? ?? ?? 89 45 E8 B8 03 00 00 00 66 89 45 EC 48 89 4D F0",
+          "extract": "insn_disp",
+          "disp_off": 2,
+          "disp_size": 4,
+          "site_va": "0x140102D4F",
+          "insn": "mov eax, dword ptr [rax + 0x168]",
+          "length": 22,
+          "wildcards": 4,
+          "anchor_len": 16,
+          "score": 25.064,
+          "id": "SpawnIDOffset#0"
+        },
+        {
+          "pattern": "8B 80 ?? ?? ?? ?? 89 45 8C C7 45 88 0C 00 00 00",
+          "extract": "insn_disp",
+          "disp_off": 2,
+          "disp_size": 4,
+          "site_va": "0x1400C6E08",
+          "insn": "mov eax, dword ptr [rax + 0x168]",
+          "length": 16,
+          "wildcards": 4,
+          "anchor_len": 10,
+          "score": 12.6,
+          "id": "SpawnIDOffset#1"
+        },
+        {
+          "pattern": "FF 90 ?? ?? ?? ?? 48 8B 07 48 8B CF FF 50 58",
+          "extract": "insn_disp",
+          "disp_off": 2,
+          "disp_size": 4,
+          "site_va": "0x140087428",
+          "insn": "call qword ptr [rax + 0x168]",
+          "length": 15,
+          "wildcards": 4,
+          "anchor_len": 9,
+          "score": 10.417,
+          "id": "SpawnIDOffset#2"
+        },
+        {
+          "pattern": "8B 80 ?? ?? ?? ?? 0F 57 C0 F3 48 0F 2A 43 08",
+          "extract": "insn_disp",
+          "disp_off": 2,
+          "disp_size": 4,
+          "site_va": "0x1400E4D7A",
+          "insn": "mov eax, dword ptr [rax + 0x168]",
+          "length": 15,
+          "wildcards": 4,
+          "anchor_len": 9,
+          "score": 10.417,
+          "id": "SpawnIDOffset#3"
+        },
+        {
+          "pattern": "0F B7 88 ?? ?? ?? ?? 66 89 4C 24 40 48 8B CF",
+          "extract": "insn_disp",
+          "disp_off": 3,
+          "disp_size": 4,
+          "site_va": "0x140108CD7",
+          "insn": "movzx ecx, word ptr [rax + 0x168]",
+          "length": 15,
+          "wildcards": 4,
+          "anchor_len": 8,
+          "score": 8.417,
+          "id": "SpawnIDOffset#4"
+        }
+      ]
+    },
+    "SpawnInfo Offsets::OwnerIDOffset": {
+      "section": "SpawnInfo Offsets",
+      "field": "OwnerIDOffset",
+      "known_value": "0x554",
+      "signatures": [
+        {
+          "pattern": "83 B9 ?? ?? ?? ?? 00 0F 44 C2 44 38 A9 35 01 00 00",
+          "extract": "insn_disp",
+          "disp_off": 2,
+          "disp_size": 4,
+          "site_va": "0x1401EABD4",
+          "insn": "cmp dword ptr [rcx + 0x554], 0",
+          "length": 17,
+          "wildcards": 4,
+          "anchor_len": 11,
+          "score": 14.744,
+          "id": "OwnerIDOffset#0"
+        },
+        {
+          "pattern": "8B 90 ?? ?? ?? ?? 85 D2 74 ?? 48 8B 0D ?? ?? ?? ?? 48 8B 01 FF 50 10 48 8B D8 48 85 C0",
+          "extract": "insn_disp",
+          "disp_off": 2,
+          "disp_size": 4,
+          "site_va": "0x1400EC0C1",
+          "insn": "mov edx, dword ptr [rax + 0x554]",
+          "length": 29,
+          "wildcards": 9,
+          "anchor_len": 12,
+          "score": 13.443,
+          "id": "OwnerIDOffset#1"
+        },
+        {
+          "pattern": "8B 97 ?? ?? ?? ?? 48 8B 01 FF 50 10 48 85 C0 74 ?? 8B 8F 68 01 00 00",
+          "extract": "insn_disp",
+          "disp_off": 2,
+          "disp_size": 4,
+          "site_va": "0x14030E463",
+          "insn": "mov edx, dword ptr [rdi + 0x554]",
+          "length": 23,
+          "wildcards": 5,
+          "anchor_len": 10,
+          "score": 12.202,
+          "id": "OwnerIDOffset#2"
+        },
+        {
+          "pattern": "8B 93 ?? ?? ?? ?? 48 8B 01 FF 50 10 48 85 C0 74 ?? 8B 88 68 01 00 00",
+          "extract": "insn_disp",
+          "disp_off": 2,
+          "disp_size": 4,
+          "site_va": "0x140325D77",
+          "insn": "mov edx, dword ptr [rbx + 0x554]",
+          "length": 23,
+          "wildcards": 5,
+          "anchor_len": 10,
+          "score": 12.202,
+          "id": "OwnerIDOffset#3"
+        },
+        {
+          "pattern": "44 39 B0 ?? ?? ?? ?? 74 ?? 44 39 B0 4C 13 00 00 75 ?? 44 38 B6 12 55 00 00 0F 95 C2",
+          "extract": "insn_disp",
+          "disp_off": 3,
+          "disp_size": 4,
+          "site_va": "0x1401AF5D5",
+          "insn": "cmp dword ptr [rax + 0x554], r14d",
+          "length": 28,
+          "wildcards": 6,
+          "anchor_len": 10,
+          "score": 11.514,
+          "id": "OwnerIDOffset#4"
+        }
+      ]
+    },
+    "SpawnInfo Offsets::HideOffset": {
+      "section": "SpawnInfo Offsets",
+      "field": "HideOffset",
+      "known_value": "0x4D0",
+      "signatures": [
+        {
+          "pattern": "80 B9 ?? ?? ?? ?? 00 74 ?? 8B D3 48 8D 8E E0 02 00 00",
+          "extract": "insn_disp",
+          "disp_off": 2,
+          "disp_size": 4,
+          "site_va": "0x14010E6B5",
+          "insn": "cmp byte ptr [rcx + 0x4d0], 0",
+          "length": 18,
+          "wildcards": 5,
+          "anchor_len": 9,
+          "score": 9.744,
+          "id": "HideOffset#0"
+        },
+        {
+          "pattern": "F3 41 0F 11 87 ?? ?? ?? ?? 45 33 C9 45 33 C0",
+          "extract": "insn_disp",
+          "disp_off": 5,
+          "disp_size": 4,
+          "site_va": "0x14031C4EE",
+          "insn": "movss dword ptr [r15 + 0x4d0], xmm0",
+          "length": 15,
+          "wildcards": 4,
+          "anchor_len": 6,
+          "score": 4.417,
+          "id": "HideOffset#1"
+        },
+        {
+          "pattern": "48 63 88 ?? ?? ?? ?? 8B 80 68 01 00 00",
+          "extract": "insn_disp",
+          "disp_off": 3,
+          "disp_size": 4,
+          "site_va": "0x140102D48",
+          "insn": "movsxd rcx, dword ptr [rax + 0x4d0]",
+          "length": 13,
+          "wildcards": 4,
+          "anchor_len": 6,
+          "score": 3.896,
+          "id": "HideOffset#2"
+        },
+        {
+          "pattern": "C6 82 ?? ?? ?? ?? 00 8B D6 48 8B CF",
+          "extract": "insn_disp",
+          "disp_off": 2,
+          "disp_size": 4,
+          "site_va": "0x14010E296",
+          "insn": "mov byte ptr [rdx + 0x4d0], 0",
+          "length": 12,
+          "wildcards": 4,
+          "anchor_len": 6,
+          "score": 3.533,
+          "id": "HideOffset#3"
+        },
+        {
+          "pattern": "39 B7 ?? ?? ?? ?? 0F 8E ?? ?? ?? ?? 80 BF 35 01 00 00 01",
+          "extract": "insn_disp",
+          "disp_off": 2,
+          "disp_size": 4,
+          "site_va": "0x140312727",
+          "insn": "cmp dword ptr [rdi + 0x4d0], esi",
+          "length": 19,
+          "wildcards": 8,
+          "anchor_len": 7,
+          "score": 2.729,
+          "id": "HideOffset#4"
+        }
+      ]
+    },
+    "SpawnInfo Offsets::LevelOffset": {
+      "section": "SpawnInfo Offsets",
+      "field": "LevelOffset",
+      "known_value": "0x564",
+      "signatures": [
+        {
+          "pattern": "88 81 ?? ?? ?? ?? 48 83 BF 30 38 00 00 00",
+          "extract": "insn_disp",
+          "disp_off": 2,
+          "disp_size": 4,
+          "site_va": "0x1403B34A1",
+          "insn": "mov byte ptr [rcx + 0x564], al",
+          "length": 14,
+          "wildcards": 4,
+          "anchor_len": 8,
+          "score": 8.186,
+          "id": "LevelOffset#0"
+        },
+        {
+          "pattern": "44 8B B8 ?? ?? ?? ?? 48 8B 03 FF 50 28",
+          "extract": "insn_disp",
+          "disp_off": 3,
+          "disp_size": 4,
+          "site_va": "0x1406752F8",
+          "insn": "mov r15d, dword ptr [rax + 0x564]",
+          "length": 13,
+          "wildcards": 4,
+          "anchor_len": 6,
+          "score": 3.896,
+          "id": "LevelOffset#1"
+        },
+        {
+          "pattern": "88 81 ?? ?? ?? ?? 48 8B 0D ?? ?? ?? ?? 48 81 C1 38 28 00 00",
+          "extract": "insn_disp",
+          "disp_off": 2,
+          "disp_size": 4,
+          "site_va": "0x1402975A0",
+          "insn": "mov byte ptr [rcx + 0x564], al",
+          "length": 20,
+          "wildcards": 8,
+          "anchor_len": 7,
+          "score": 3.0,
+          "id": "LevelOffset#2"
+        },
+        {
+          "pattern": "88 81 ?? ?? ?? ?? 48 8B 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? C6 80 50 28 00 00 01",
+          "extract": "insn_disp",
+          "disp_off": 2,
+          "disp_size": 4,
+          "site_va": "0x14021E533",
+          "insn": "mov byte ptr [rcx + 0x564], al",
+          "length": 32,
+          "wildcards": 16,
+          "anchor_len": 7,
+          "score": -0.8,
+          "id": "LevelOffset#3"
+        },
+        {
+          "pattern": "40 88 BB ?? ?? ?? ?? E9 ?? ?? ?? ?? 48 8B 0D ?? ?? ?? ?? 48 8D 54 24 50",
+          "extract": "insn_disp",
+          "disp_off": 3,
+          "disp_size": 4,
+          "site_va": "0x1402144B4",
+          "insn": "mov byte ptr [rbx + 0x564], dil",
+          "length": 24,
+          "wildcards": 12,
+          "anchor_len": 5,
+          "score": -3.6,
+          "id": "LevelOffset#4"
+        }
+      ]
+    },
+    "SpawnInfo Offsets::ClassOffset": {
+      "section": "SpawnInfo Offsets",
+      "field": "ClassOffset",
+      "known_value": "0xFCC",
+      "signatures": [
+        {
+          "pattern": "8B 90 ?? ?? ?? ?? 48 8B 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? 4C 8B 05 ?? ?? ?? ?? 49 81 C0 B4 00 00 00 48 89 44 24 20 4C 8D 0D ?? ?? ?? ?? 48 8D 15 ?? ?? ?? ?? 49 8B CE",
+          "extract": "insn_disp",
+          "disp_off": 2,
+          "disp_size": 4,
+          "site_va": "0x14014A5E4",
+          "insn": "mov edx, dword ptr [rax + 0xfcc]",
+          "length": 54,
+          "wildcards": 24,
+          "anchor_len": 15,
+          "score": 13.011,
+          "id": "ClassOffset#0"
+        },
+        {
+          "pattern": "41 83 BE ?? ?? ?? ?? 08 0F 84 ?? ?? ?? ?? 45 33 C9 BA C5 00 00 00",
+          "extract": "insn_disp",
+          "disp_off": 3,
+          "disp_size": 4,
+          "site_va": "0x1400E2B7F",
+          "insn": "cmp dword ptr [r14 + 0xfcc], 8",
+          "length": 22,
+          "wildcards": 8,
+          "anchor_len": 8,
+          "score": 5.427,
+          "id": "ClassOffset#1"
+        },
+        {
+          "pattern": "83 BB ?? ?? ?? ?? 08 75 ?? 45 38 A6 0F 02 00 00",
+          "extract": "insn_disp",
+          "disp_off": 2,
+          "disp_size": 4,
+          "site_va": "0x1402A3E10",
+          "insn": "cmp dword ptr [rbx + 0xfcc], 8",
+          "length": 16,
+          "wildcards": 5,
+          "anchor_len": 7,
+          "score": 5.35,
+          "id": "ClassOffset#2"
+        },
+        {
+          "pattern": "41 8B 86 ?? ?? ?? ?? 83 C0 D8 83 F8 22",
+          "extract": "insn_disp",
+          "disp_off": 3,
+          "disp_size": 4,
+          "site_va": "0x140286272",
+          "insn": "mov eax, dword ptr [r14 + 0xfcc]",
+          "length": 13,
+          "wildcards": 4,
+          "anchor_len": 6,
+          "score": 3.896,
+          "id": "ClassOffset#3"
+        },
+        {
+          "pattern": "8B 87 ?? ?? ?? ?? 89 03 8B 44 24 68",
+          "extract": "insn_disp",
+          "disp_off": 2,
+          "disp_size": 4,
+          "site_va": "0x140224652",
+          "insn": "mov eax, dword ptr [rdi + 0xfcc]",
+          "length": 12,
+          "wildcards": 4,
+          "anchor_len": 6,
+          "score": 3.533,
+          "id": "ClassOffset#4"
+        }
+      ]
+    },
+    "SpawnInfo Offsets::RaceOffset": {
+      "section": "SpawnInfo Offsets",
+      "field": "RaceOffset",
+      "known_value": "0xFC4",
+      "signatures": [
+        {
+          "pattern": "8B 81 ?? ?? ?? ?? 89 44 24 20 8B 81 CC 0F 00 00 89 44 24 24 0F B6 81 D0 0F 00 00 48 8B CA 89 44 24 28 48 8B 02 FF 10 44 8B C7",
+          "extract": "insn_disp",
+          "disp_off": 2,
+          "disp_size": 4,
+          "site_va": "0x1404C98F1",
+          "insn": "mov eax, dword ptr [rcx + 0xfc4]",
+          "length": 42,
+          "wildcards": 4,
+          "anchor_len": 36,
+          "score": 23.795,
+          "id": "RaceOffset#0"
+        },
+        {
+          "pattern": "8B 81 ?? ?? ?? ?? 89 44 24 40 8B 81 CC 0F 00 00",
+          "extract": "insn_disp",
+          "disp_off": 2,
+          "disp_size": 4,
+          "site_va": "0x1404CA1BE",
+          "insn": "mov eax, dword ptr [rcx + 0xfc4]",
+          "length": 16,
+          "wildcards": 4,
+          "anchor_len": 10,
+          "score": 12.6,
+          "id": "RaceOffset#1"
+        },
+        {
+          "pattern": "8B 87 ?? ?? ?? ?? EB ?? 48 8B CF FF D2 3D 4A 02 00 00",
+          "extract": "insn_disp",
+          "disp_off": 2,
+          "disp_size": 4,
+          "site_va": "0x1403044D5",
+          "insn": "mov eax, dword ptr [rdi + 0xfc4]",
+          "length": 18,
+          "wildcards": 5,
+          "anchor_len": 10,
+          "score": 11.744,
+          "id": "RaceOffset#2"
+        },
+        {
+          "pattern": "8B 88 ?? ?? ?? ?? 0F B6 90 D0 0F 00 00",
+          "extract": "insn_disp",
+          "disp_off": 2,
+          "disp_size": 4,
+          "site_va": "0x1404C8E76",
+          "insn": "mov ecx, dword ptr [rax + 0xfc4]",
+          "length": 13,
+          "wildcards": 4,
+          "anchor_len": 7,
+          "score": 5.896,
+          "id": "RaceOffset#3"
+        },
+        {
+          "pattern": "8B 83 ?? ?? ?? ?? 89 44 24 34",
+          "extract": "insn_disp",
+          "disp_off": 2,
+          "disp_size": 4,
+          "site_va": "0x1400A03ED",
+          "insn": "mov eax, dword ptr [rbx + 0xfc4]",
+          "length": 10,
+          "wildcards": 4,
+          "anchor_len": 4,
+          "score": -1.5,
+          "id": "RaceOffset#4"
+        }
+      ]
+    },
+    "SpawnInfo Offsets::PrimaryOffset": {
+      "section": "SpawnInfo Offsets",
+      "field": "PrimaryOffset",
+      "known_value": "0x10D4",
+      "signatures": [
+        {
+          "pattern": "0F 11 81 ?? ?? ?? ?? 8B 87 10 01 00 00 89 81 E4 10 00 00",
+          "extract": "insn_disp",
+          "disp_off": 3,
+          "disp_size": 4,
+          "site_va": "0x1402E3D1D",
+          "insn": "movups xmmword ptr [rcx + 0x10d4], xmm0",
+          "length": 19,
+          "wildcards": 4,
+          "anchor_len": 12,
+          "score": 16.939,
+          "id": "PrimaryOffset#0"
+        },
+        {
+          "pattern": "8B 90 ?? ?? ?? ?? 48 8B 89 40 01 00 00 E8 ?? ?? ?? ?? 84 C0 75 ?? 40 32 ED",
+          "extract": "insn_disp",
+          "disp_off": 2,
+          "disp_size": 4,
+          "site_va": "0x140303444",
+          "insn": "mov edx, dword ptr [rax + 0x10d4]",
+          "length": 25,
+          "wildcards": 9,
+          "anchor_len": 8,
+          "score": 5.05,
+          "id": "PrimaryOffset#1"
+        },
+        {
+          "pattern": "0F 11 80 ?? ?? ?? ?? 89 98 E4 10 00 00",
+          "extract": "insn_disp",
+          "disp_off": 3,
+          "disp_size": 4,
+          "site_va": "0x1403B5A18",
+          "insn": "movups xmmword ptr [rax + 0x10d4], xmm0",
+          "length": 13,
+          "wildcards": 4,
+          "anchor_len": 6,
+          "score": 3.896,
+          "id": "PrimaryOffset#2"
+        }
+      ]
+    },
+    "SpawnInfo Offsets::OffhandOffset": {
+      "section": "SpawnInfo Offsets",
+      "field": "OffhandOffset",
+      "known_value": "0x10E8",
+      "signatures": [
+        {
+          "pattern": "8B 90 ?? ?? ?? ?? 48 8B 89 40 01 00 00 E8 ?? ?? ?? ?? 84 C0 75 ?? 49 8B 47 08",
+          "extract": "insn_disp",
+          "disp_off": 2,
+          "disp_size": 4,
+          "site_va": "0x140303423",
+          "insn": "mov edx, dword ptr [rax + 0x10e8]",
+          "length": 26,
+          "wildcards": 9,
+          "anchor_len": 8,
+          "score": 5.177,
+          "id": "OffhandOffset#0"
+        },
+        {
+          "pattern": "0F 11 80 ?? ?? ?? ?? 89 98 F8 10 00 00",
+          "extract": "insn_disp",
+          "disp_off": 3,
+          "disp_size": 4,
+          "site_va": "0x1403B5A51",
+          "insn": "movups xmmword ptr [rax + 0x10e8], xmm0",
+          "length": 13,
+          "wildcards": 4,
+          "anchor_len": 6,
+          "score": 3.896,
+          "id": "OffhandOffset#1"
+        },
+        {
+          "pattern": "48 8D 8A ?? ?? ?? ?? 48 85 C9 74 ??",
+          "extract": "insn_disp",
+          "disp_off": 3,
+          "disp_size": 4,
+          "site_va": "0x14049E2BE",
+          "insn": "lea rcx, [rdx + 0x10e8]",
+          "length": 12,
+          "wildcards": 5,
+          "anchor_len": 4,
+          "score": -2.133,
+          "id": "OffhandOffset#2"
+        }
+      ]
+    },
+    "GroundItem Offsets::IdOffset": {
+      "section": "GroundItem Offsets",
+      "field": "IdOffset",
+      "known_value": "0x10",
+      "signatures": []
+    },
+    "GroundItem Offsets::DropIdOffset": {
+      "section": "GroundItem Offsets",
+      "field": "DropIdOffset",
+      "known_value": "0x18",
+      "signatures": []
+    },
+    "GroundItem Offsets::XOffset": {
+      "section": "GroundItem Offsets",
+      "field": "XOffset",
+      "known_value": "0x8C",
+      "signatures": [
+        {
+          "pattern": "0F B6 83 ?? ?? ?? ?? 41 88 84 24 8C 00 00 00",
+          "extract": "insn_disp",
+          "disp_off": 3,
+          "disp_size": 4,
+          "site_va": "0x1400A96FC",
+          "insn": "movzx eax, byte ptr [rbx + 0x8c]",
+          "length": 15,
+          "wildcards": 4,
+          "anchor_len": 8,
+          "score": 8.417,
+          "id": "XOffset#0"
+        }
+      ]
+    },
+    "GroundItem Offsets::YOffset": {
+      "section": "GroundItem Offsets",
+      "field": "YOffset",
+      "known_value": "0x90",
+      "signatures": []
+    },
+    "GroundItem Offsets::ZOffset": {
+      "section": "GroundItem Offsets",
+      "field": "ZOffset",
+      "known_value": "0x94",
+      "signatures": [
+        {
+          "pattern": "48 C7 80 ?? ?? ?? ?? 00 00 00 00 48 C7 80 9C 00 00 00 00 00 00 00",
+          "extract": "insn_disp",
+          "disp_off": 3,
+          "disp_size": 4,
+          "site_va": "0x1400A3C02",
+          "insn": "mov qword ptr [rax + 0x94], 0",
+          "length": 22,
+          "wildcards": 4,
+          "anchor_len": 15,
+          "score": 23.064,
+          "id": "ZOffset#0"
+        },
+        {
+          "pattern": "48 89 91 ?? ?? ?? ?? 48 89 91 9C 00 00 00",
+          "extract": "insn_disp",
+          "disp_off": 3,
+          "disp_size": 4,
+          "site_va": "0x1400A3CBC",
+          "insn": "mov qword ptr [rcx + 0x94], rdx",
+          "length": 14,
+          "wildcards": 4,
+          "anchor_len": 7,
+          "score": 6.186,
+          "id": "ZOffset#1"
+        }
+      ]
+    },
+    "GroundItem Offsets::NameOffset": {
+      "section": "GroundItem Offsets",
+      "field": "NameOffset",
+      "known_value": "0x38",
+      "signatures": []
+    }
+  }
+}

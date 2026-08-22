@@ -1,0 +1,54 @@
+{
+  "patch_date": "07/17/2026",
+  "client_hash": "2ac3ac3e0418736947c3ee5a95ead52546914768",
+  "build_string": "Release Client #630 12:42:52 Jul  9 2026",
+  "source": "published MySEQ offset list for PatchDate 07/17/2026",
+  "binary_sha256": "6f3c4ff56abf0decf3c5d6cea2926ec98ad97af0f4fd170aae367ee9c6a56db8",
+  "memory_offsets": {
+    "ZoneAddr": "0x140eb78f4",
+    "SpawnHeaderAddr": "0x140f2e888",
+    "CharInfo": "0x140eb1d08",
+    "TargetAddr": "0x140de3b50",
+    "ItemsAddr": "0x140eaeb80",
+    "WorldAddr": "0x140eb1a40"
+  },
+  "static_sections": {
+    "WorldInfo Offsets": {
+      "WorldHourOffset": "8",
+      "WorldMinuteOffset": "9",
+      "WorldDayOffset": "10",
+      "WorldMonthOffset": "11",
+      "WorldYearOffset": "12"
+    },
+    "SpawnInfo Offsets": {
+      "NextOffset": "0x8",
+      "PrevOffset": "0x10",
+      "LastnameOffset": "0x48",
+      "XOffset": "0x74",
+      "YOffset": "0x78",
+      "ZOffset": "0x7c",
+      "SpeedOffset": "0x8c",
+      "HeadingOffset": "0x90",
+      "NameOffset": "0xb4",
+      "TypeOffset": "0x135",
+      "SpawnIDOffset": "0x168",
+      "OwnerIDOffset": "0x554",
+      "HideOffset": "0x4d0",
+      "LevelOffset": "0x564",
+      "ClassOffset": "0xfcc",
+      "RaceOffset": "0xfc4",
+      "PrimaryOffset": "0x10d4",
+      "OffhandOffset": "0x10e8"
+    },
+    "GroundItem Offsets": {
+      "PrevOffset": "0x0",
+      "NextOffset": "0x8",
+      "IdOffset": "0x10",
+      "DropIdOffset": "0x18",
+      "XOffset": "0x8c",
+      "YOffset": "0x90",
+      "ZOffset": "0x94",
+      "NameOffset": "0x38"
+    }
+  }
+}

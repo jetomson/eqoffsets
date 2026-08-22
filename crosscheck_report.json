@@ -1,0 +1,377 @@
+{
+  "meta": {
+    "patches": [
+      "2026-07-17",
+      "2026-08-19"
+    ],
+    "boundaries_tested": 1,
+    "generated_utc": "2026-08-21T23:20:01"
+  },
+  "boundaries": [
+    {
+      "from": "2026-07-17",
+      "to": "2026-08-19",
+      "offsets": {
+        "ZoneAddr": {
+          "expected": "0x140EBA8F4",
+          "got": "0x140EBA8F4",
+          "passed": true,
+          "unanimous": true,
+          "sig_results": {
+            "ZoneAddr#0": {
+              "matched": true,
+              "value": "0x140EBA8F4",
+              "correct": true,
+              "failure": null
+            },
+            "ZoneAddr#1": {
+              "matched": true,
+              "value": "0x140EBA8F4",
+              "correct": true,
+              "failure": null
+            },
+            "ZoneAddr#2": {
+              "matched": true,
+              "value": "0x140EBA8F4",
+              "correct": true,
+              "failure": null
+            },
+            "ZoneAddr#3": {
+              "matched": true,
+              "value": "0x140EBA8F4",
+              "correct": true,
+              "failure": null
+            },
+            "ZoneAddr#4": {
+              "matched": true,
+              "value": "0x140EBA8F4",
+              "correct": true,
+              "failure": null
+            }
+          }
+        },
+        "SpawnHeaderAddr": {
+          "expected": "0x140F31898",
+          "got": "0x140F31898",
+          "passed": true,
+          "unanimous": true,
+          "sig_results": {
+            "SpawnHeaderAddr#0": {
+              "matched": true,
+              "value": "0x140F31898",
+              "correct": true,
+              "failure": null
+            },
+            "SpawnHeaderAddr#1": {
+              "matched": true,
+              "value": "0x140F31898",
+              "correct": true,
+              "failure": null
+            },
+            "SpawnHeaderAddr#2": {
+              "matched": true,
+              "value": "0x140F31898",
+              "correct": true,
+              "failure": null
+            },
+            "SpawnHeaderAddr#3": {
+              "matched": true,
+              "value": "0x140F31898",
+              "correct": true,
+              "failure": null
+            },
+            "SpawnHeaderAddr#4": {
+              "matched": true,
+              "value": "0x140F31898",
+              "correct": true,
+              "failure": null
+            }
+          }
+        },
+        "CharInfo": {
+          "expected": "0x140EB4F10",
+          "got": "0x140EB4F10",
+          "passed": true,
+          "unanimous": false,
+          "sig_results": {
+            "CharInfo#0": {
+              "matched": false,
+              "value": null,
+              "correct": false,
+              "failure": "no match"
+            },
+            "CharInfo#1": {
+              "matched": false,
+              "value": null,
+              "correct": false,
+              "failure": "no match"
+            },
+            "CharInfo#2": {
+              "matched": false,
+              "value": null,
+              "correct": false,
+              "failure": "no match"
+            },
+            "CharInfo#3": {
+              "matched": true,
+              "value": "0x140EB4F10",
+              "correct": true,
+              "failure": null
+            },
+            "CharInfo#4": {
+              "matched": true,
+              "value": "0x140EB4F10",
+              "correct": true,
+              "failure": null
+            }
+          }
+        },
+        "TargetAddr": {
+          "expected": "0x140DE6B50",
+          "got": "0x140DE6B50",
+          "passed": true,
+          "unanimous": false,
+          "sig_results": {
+            "TargetAddr#0": {
+              "matched": false,
+              "value": null,
+              "correct": false,
+              "failure": "no match"
+            },
+            "TargetAddr#1": {
+              "matched": true,
+              "value": "0x140DE6B50",
+              "correct": true,
+              "failure": null
+            },
+            "TargetAddr#2": {
+              "matched": true,
+              "value": "0x140DE6B50",
+              "correct": true,
+              "failure": null
+            }
+          }
+        },
+        "ItemsAddr": {
+          "expected": "0x140EB1B80",
+          "got": "0x140EB1B80",
+          "passed": true,
+          "unanimous": true,
+          "sig_results": {
+            "ItemsAddr#0": {
+              "matched": true,
+              "value": "0x140EB1B80",
+              "correct": true,
+              "failure": null
+            },
+            "ItemsAddr#1": {
+              "matched": true,
+              "value": "0x140EB1B80",
+              "correct": true,
+              "failure": null
+            },
+            "ItemsAddr#2": {
+              "matched": true,
+              "value": "0x140EB1B80",
+              "correct": true,
+              "failure": null
+            },
+            "ItemsAddr#3": {
+              "matched": true,
+              "value": "0x140EB1B80",
+              "correct": true,
+              "failure": null
+            }
+          }
+        },
+        "WorldAddr": {
+          "expected": "0x140EB2A48",
+          "got": "0x140EB2A48",
+          "passed": true,
+          "unanimous": true,
+          "sig_results": {
+            "WorldAddr#0": {
+              "matched": true,
+              "value": "0x140EB2A48",
+              "correct": true,
+              "failure": null
+            },
+            "WorldAddr#1": {
+              "matched": true,
+              "value": "0x140EB2A48",
+              "correct": true,
+              "failure": null
+            },
+            "WorldAddr#2": {
+              "matched": true,
+              "value": "0x140EB2A48",
+              "correct": true,
+              "failure": null
+            },
+            "WorldAddr#3": {
+              "matched": true,
+              "value": "0x140EB2A48",
+              "correct": true,
+              "failure": null
+            },
+            "WorldAddr#4": {
+              "matched": true,
+              "value": "0x140EB2A48",
+              "correct": true,
+              "failure": null
+            }
+          }
+        }
+      }
+    }
+  ],
+  "survival": {
+    "ZoneAddr": {
+      "ZoneAddr#0": {
+        "tested": 1,
+        "passed": 1,
+        "rate": 1.0
+      },
+      "ZoneAddr#1": {
+        "tested": 1,
+        "passed": 1,
+        "rate": 1.0
+      },
+      "ZoneAddr#2": {
+        "tested": 1,
+        "passed": 1,
+        "rate": 1.0
+      },
+      "ZoneAddr#3": {
+        "tested": 1,
+        "passed": 1,
+        "rate": 1.0
+      },
+      "ZoneAddr#4": {
+        "tested": 1,
+        "passed": 1,
+        "rate": 1.0
+      }
+    },
+    "SpawnHeaderAddr": {
+      "SpawnHeaderAddr#0": {
+        "tested": 1,
+        "passed": 1,
+        "rate": 1.0
+      },
+      "SpawnHeaderAddr#1": {
+        "tested": 1,
+        "passed": 1,
+        "rate": 1.0
+      },
+      "SpawnHeaderAddr#2": {
+        "tested": 1,
+        "passed": 1,
+        "rate": 1.0
+      },
+      "SpawnHeaderAddr#3": {
+        "tested": 1,
+        "passed": 1,
+        "rate": 1.0
+      },
+      "SpawnHeaderAddr#4": {
+        "tested": 1,
+        "passed": 1,
+        "rate": 1.0
+      }
+    },
+    "CharInfo": {
+      "CharInfo#0": {
+        "tested": 1,
+        "passed": 0,
+        "rate": 0.0
+      },
+      "CharInfo#1": {
+        "tested": 1,
+        "passed": 0,
+        "rate": 0.0
+      },
+      "CharInfo#2": {
+        "tested": 1,
+        "passed": 0,
+        "rate": 0.0
+      },
+      "CharInfo#3": {
+        "tested": 1,
+        "passed": 1,
+        "rate": 1.0
+      },
+      "CharInfo#4": {
+        "tested": 1,
+        "passed": 1,
+        "rate": 1.0
+      }
+    },
+    "TargetAddr": {
+      "TargetAddr#0": {
+        "tested": 1,
+        "passed": 0,
+        "rate": 0.0
+      },
+      "TargetAddr#1": {
+        "tested": 1,
+        "passed": 1,
+        "rate": 1.0
+      },
+      "TargetAddr#2": {
+        "tested": 1,
+        "passed": 1,
+        "rate": 1.0
+      }
+    },
+    "ItemsAddr": {
+      "ItemsAddr#0": {
+        "tested": 1,
+        "passed": 1,
+        "rate": 1.0
+      },
+      "ItemsAddr#1": {
+        "tested": 1,
+        "passed": 1,
+        "rate": 1.0
+      },
+      "ItemsAddr#2": {
+        "tested": 1,
+        "passed": 1,
+        "rate": 1.0
+      },
+      "ItemsAddr#3": {
+        "tested": 1,
+        "passed": 1,
+        "rate": 1.0
+      }
+    },
+    "WorldAddr": {
+      "WorldAddr#0": {
+        "tested": 1,
+        "passed": 1,
+        "rate": 1.0
+      },
+      "WorldAddr#1": {
+        "tested": 1,
+        "passed": 1,
+        "rate": 1.0
+      },
+      "WorldAddr#2": {
+        "tested": 1,
+        "passed": 1,
+        "rate": 1.0
+      },
+      "WorldAddr#3": {
+        "tested": 1,
+        "passed": 1,
+        "rate": 1.0
+      },
+      "WorldAddr#4": {
+        "tested": 1,
+        "passed": 1,
+        "rate": 1.0
+      }
+    }
+  }
+}

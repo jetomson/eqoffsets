@@ -1,0 +1,34 @@
+{
+  "patch_date": "10/15/2025",
+  "note": "Fill memory_offsets from a published list that matches the exact eqgame.exe you point --binary at. If they do not match, signature building will find zero references and tell you so.",
+  "memory_offsets": {
+    "ZoneAddr": "0x140eb78f4",
+    "SpawnHeaderAddr": "0x140f2e888",
+    "CharInfo": "0x140eb1d08",
+    "TargetAddr": "0x140de3b50",
+    "ItemsAddr": "0x140eaeb80",
+    "WorldAddr": "0x140eb1a40"
+  },
+  "static_sections": {
+    "WorldInfo Offsets": {
+      "WorldHourOffset": "8",
+      "WorldMinuteOffset": "9",
+      "WorldDayOffset": "10",
+      "WorldMonthOffset": "11",
+      "WorldYearOffset": "12"
+    },
+    "SpawnInfo Offsets": {
+      "NextOffset": "0x8", "PrevOffset": "0x10", "LastnameOffset": "0x48",
+      "XOffset": "0x74", "YOffset": "0x78", "ZOffset": "0x7c",
+      "SpeedOffset": "0x8c", "HeadingOffset": "0x90", "NameOffset": "0xb4",
+      "TypeOffset": "0x135", "SpawnIDOffset": "0x168", "OwnerIDOffset": "0x554",
+      "HideOffset": "0x4d0", "LevelOffset": "0x564", "ClassOffset": "0xfcc",
+      "RaceOffset": "0xfc4", "PrimaryOffset": "0x10d4", "OffhandOffset": "0x10e8"
+    },
+    "GroundItem Offsets": {
+      "PrevOffset": "0x0", "NextOffset": "0x8", "IdOffset": "0x10",
+      "DropIdOffset": "0x18", "XOffset": "0x8c", "YOffset": "0x90",
+      "ZOffset": "0x94", "NameOffset": "0x38"
+    }
+  }
+}

@@ -1,0 +1,9 @@
+*.pyc
+__pycache__/
+.venv/
+.claude/
+
+# Real eqgame.exe copies are Daybreak's copyrighted client, not ours to
+# redistribute -- keep the directory's own metadata (README/sha256 files)
+# tracked, just not the binaries themselves.
+binaries/*/eqgame.exe

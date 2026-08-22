@@ -1,0 +1,92 @@
+{
+  "patch_date": "08/19/2026",
+  "client_hash": "c3a92b23defa08dde22c918c2d256b0e35c0b06a",
+  "build_string": "Release Client #630 13:29:05 Aug 13 2026",
+  "source": "VERIFIED against a published MySEQ list (myseqserver_8-19-2026.ini, labeled PatchDate=08/20/2026 -- same binary, sha1 c3a92b23... matches exactly, the client just wasn't published until a day after this build compiled). All 6 memory_offsets and all struct_offsets in this file now match the published list. See _provenance for the diff and the one correction it caused.",
+  "binary_sha256": "9d4856442f7fcdbdda3b26a13bf2b9c672df4971aef0eab5e69a55775e13e522",
+  "_provenance": {
+    "method": "cli.py resolve --binary binaries/2026-08-19/eqgame.exe --sigs sigs/2026-07-17.json --known known/2026-07-17.json",
+    "confidence": {
+      "ZoneAddr": "high -- 5/5 signatures unanimous",
+      "SpawnHeaderAddr": "high -- 5/5 signatures unanimous",
+      "ItemsAddr": "high -- 4/4 signatures unanimous",
+      "WorldAddr": "high -- 5/5 signatures unanimous",
+      "CharInfo": "MODERATE -- SPLIT, only 2/5 signatures matched (CharInfo#0/#1/#2 found no match at all, did not vote for a different value); the 2 that fired agree with each other and validate.py raised no problems or warnings",
+      "TargetAddr": "MODERATE -- SPLIT, only 2/3 signatures matched (TargetAddr#0 found no match at all); the 2 that fired agree with each other and validate.py raised no problems or warnings"
+    },
+    "recommendation": "RESOLVED 2026-08-21: a published list surfaced and matched CharInfo/TargetAddr exactly despite their SPLIT vote, and matched every corrected struct offset below except HideOffset (see comparison_2026_08_21). No longer treat CharInfo/TargetAddr as unconfirmed.",
+    "comparison_2026_08_21": {
+      "against": "myseqserver_8-19-2026.ini (published, PatchDate=08/20/2026, same binary -- sha1 verified)",
+      "memory_offsets": "all 6 matched exactly, including the two SPLIT ones (CharInfo, TargetAddr) -- majority-vote-with-partial-signature-survival was correct here",
+      "struct_offsets": "all matched except HideOffset -- see struct_offsets.changed.HideOffset below for the correction and what went wrong with the original call"
+    },
+    "struct_offsets": {
+      "trigger": "User reported the map showing every spawn as level 48 -- traced to LevelOffset. static_sections are copied verbatim from the prior patch's known-offsets file and are NEVER derived by build/resolve (see README 'Known limits'), so a struct reorg in this patch silently went stale.",
+      "method": "One-off manual analysis (not part of the normal pipeline, not wired into sigbuild.py -- CLAUDE.md Task 3 territory): for each field, found every instruction in the OLD binary referencing [reg+old_disp], grew a wildcarded byte signature around each site the same way sigbuild.py does but with the site's own disp32 wildcarded as the extraction target instead of held fixed, required the pattern to match exactly once in the OLD binary, then searched for it in the NEW binary and read back the new displacement. Every changed value below was additionally confirmed by eyeballing that the surrounding disassembly is the literal same code shape in both binaries (not just a byte-pattern coincidence) -- e.g. LevelOffset's two sites sit inside an identical clamp/getter function in both builds; RaceOffset/ClassOffset shift together by the same +0x10 in one shared 3-field read block; PrimaryOffset/OffhandOffset are loaded as bare immediates 2 lines apart in a cmove and both shift by the same +0x10; OwnerIDOffset's site is preceded by 'cmp byte ptr [rax+0x135],1' (TypeOffset) whose displacement did NOT change, anchoring the comparison.",
+      "changed": {
+        "LevelOffset": "0x564 -> 0x210 (confirmed: identical GetLevel-style clamp accessor, both read instructions agree, validated 8/17 site-signatures converged on this value with no other value getting more than 5)",
+        "RaceOffset": "0xfc4 -> 0xfd4 (confirmed: same instruction block as ClassOffset, +0x10 shift)",
+        "ClassOffset": "0xfcc -> 0xfdc (confirmed: 106/108 site-signatures agreed; same block as RaceOffset)",
+        "OwnerIDOffset": "0x554 -> 0x4b4 (confirmed: site immediately follows an unchanged TypeOffset check, 40/55 site-signatures agreed)",
+        "PrimaryOffset": "0x10d4 -> 0x10e4 (confirmed: bare immediate in a cmove alongside OffhandOffset, both +0x10)",
+        "OffhandOffset": "0x10e8 -> 0x10f8 (confirmed: same cmove as PrimaryOffset; an earlier automated vote for 'unchanged' on this field was a false positive from a spurious byte match, discarded after checking the disassembly)",
+        "HideOffset": "0x4d0 -> 0x304 (CORRECTED 2026-08-21: originally called 'unchanged' below, which a published list showed was wrong. The original evidence was a qword store to [rbp+0x4d0] in an init block that matched byte-for-byte across the patch -- but a bool flag is never stored as a qword, so that was a coincidental match on some unrelated struct's field whose surrounding code simply didn't change, not evidence about Hide at all. The real site: 'mov rcx,[rcx+0x10]' -- walking the spawn's own PrevOffset link -- followed immediately by 'movzx r14d, byte ptr [rcx+0x4d0]', an identical instruction block in both binaries with only the displacement changing to 0x304. Lesson: when confirming a struct-offset signature by eyeballing matched disassembly, also check the operand size matches the field's expected type (byte for a bool), not just that the block matched.)"
+      },
+      "unchanged_high_confidence": {
+        "TypeOffset": "0x135 (confirmed as a side effect of the OwnerIDOffset check -- this fixed byte had to match unchanged for that signature to match at all)",
+        "SpeedOffset": "0x8c (490/496 site-signatures agreed unchanged)",
+        "HeadingOffset": "0x90 (2412/2446 agreed unchanged)",
+        "NameOffset": "0xb4 (332/373 agreed unchanged)",
+        "SpawnIDOffset": "0x168 (613/657 agreed unchanged)"
+      },
+      "not_checked": "NextOffset, PrevOffset, LastnameOffset, XOffset, YOffset, ZOffset are disp8-encoded (values <128) so they fall outside this disp32 sweep, and GroundItem Offsets were not examined at all -- neither was in scope of the reported bug. If anything else on the map looks wrong (spawn positions, ground items), treat those sections as unverified for this patch."
+    }
+  },
+  "memory_offsets": {
+    "ZoneAddr": "0x140EBA8F4",
+    "SpawnHeaderAddr": "0x140F31898",
+    "CharInfo": "0x140EB4F10",
+    "TargetAddr": "0x140DE6B50",
+    "ItemsAddr": "0x140EB1B80",
+    "WorldAddr": "0x140EB2A48"
+  },
+  "static_sections": {
+    "WorldInfo Offsets": {
+      "WorldHourOffset": "8",
+      "WorldMinuteOffset": "9",
+      "WorldDayOffset": "10",
+      "WorldMonthOffset": "11",
+      "WorldYearOffset": "12"
+    },
+    "SpawnInfo Offsets": {
+      "NextOffset": "0x8",
+      "PrevOffset": "0x10",
+      "LastnameOffset": "0x48",
+      "XOffset": "0x74",
+      "YOffset": "0x78",
+      "ZOffset": "0x7c",
+      "SpeedOffset": "0x8c",
+      "HeadingOffset": "0x90",
+      "NameOffset": "0xb4",
+      "TypeOffset": "0x135",
+      "SpawnIDOffset": "0x168",
+      "OwnerIDOffset": "0x4b4",
+      "HideOffset": "0x304",
+      "LevelOffset": "0x210",
+      "ClassOffset": "0xfdc",
+      "RaceOffset": "0xfd4",
+      "PrimaryOffset": "0x10e4",
+      "OffhandOffset": "0x10f8"
+    },
+    "GroundItem Offsets": {
+      "PrevOffset": "0x0",
+      "NextOffset": "0x8",
+      "IdOffset": "0x10",
+      "DropIdOffset": "0x18",
+      "XOffset": "0x8c",
+      "YOffset": "0x90",
+      "ZOffset": "0x94",
+      "NameOffset": "0x38"
+    }
+  }
+}
