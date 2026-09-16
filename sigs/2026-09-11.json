@@ -3,7 +3,7 @@
     "source_binary": "binaries/2026-09-11/eqgame.exe",
     "sha256": "1d4940fabc120a13acdeb64f3056149bd83cd3476ec9e867fc65e9c2962388db",
     "image_base": "0x140000000",
-    "built_utc": "2026-09-16T22:28:12",
+    "built_utc": "2026-09-16T22:53:55",
     "patch_date": "09/16/2026"
   },
   "offsets": {
@@ -422,7 +422,7 @@
       "field": "NextOffset",
       "radix": 16,
       "known_value": "0x8",
-      "anchored_sites": 504,
+      "anchored_sites": 506,
       "signatures": [
         {
           "pattern": "48 8B 4E ?? 48 8B 01 4C 8B 4D 97 49 83 C1 08 45 33 C0 33 D2 FF 90 D8 03 00 00 90",
@@ -692,7 +692,7 @@
       "field": "LastnameOffset",
       "radix": 16,
       "known_value": "0x48",
-      "anchored_sites": 20,
+      "anchored_sites": 21,
       "signatures": [
         {
           "pattern": "4D 8D 48 ?? 48 8B CF 49 81 C0 B4 00 00 00",
@@ -2749,7 +2749,7 @@
       "field": "NextOffset",
       "radix": 16,
       "known_value": "0x8",
-      "anchored_sites": 1192,
+      "anchored_sites": 1193,
       "signatures": [
         {
           "pattern": "48 8B 4E ?? 48 8B 01 4C 8B 4D 97 49 83 C1 08 45 33 C0 33 D2 FF 90 D8 03 00 00 90",

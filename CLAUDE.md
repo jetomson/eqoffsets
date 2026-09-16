@@ -27,7 +27,7 @@ one that fails loudly.
 
 ## Testing
 
-`python3 tests/test_pipeline.py` — must stay at 21/21 (grows as behavior is
+`python3 tests/test_pipeline.py` — must stay at 26/26 (grows as behavior is
 added; do not shrink it). It builds a synthetic image, simulates a patch by
 moving the global and shifting the code, and checks the signatures still
 resolve correctly. Add a case here for every behaviour you add. Do not weaken
@@ -118,6 +118,106 @@ three correct derivations as failures. Struct values now carry a per-section
 
 **Do not** lower `Resolution.consistent` to a plurality to shrink the
 `UNCONFIRMED` list. It is currently one field long and honest.
+
+### 3b. A second real boundary, and the honest answer to "what about UNCONFIRMED fields" (2026-09-16)
+
+Pulled the live 09/11/2026 client from disk, resolved it cold against the
+08/19 signature set (no known-offsets file for it yet), then scored it
+against a published list once the user provided one: **36/37**, every real
+shift correctly derived (`OwnerIDOffset`, `ClassOffset`, `RaceOffset`,
+`PrimaryOffset`, `OffhandOffset` all `+8` together), one field
+(`SpawnInfo.HideOffset`) correctly left `UNCONFIRMED`. See
+`known/2026-09-11.json`'s `_provenance` for the full vote breakdown.
+
+That raised the real question this project exists to answer: if `resolve`
+won't guess, and the whole point is not waiting on someone else's list, what
+*do* you do with an `UNCONFIRMED` field? Investigating the actual failure
+(not guessing at a fix) turned up two separate, honest things, not one:
+
+1. **A real, safe widening: tail-call `this` propagation.** The old rule only
+   propagated trust through a direct `call`; it now also recognizes an
+   unconditional `jmp` straight to another function's entry point (a
+   tail call) as passing `this` the same way, since `codemap.function_starts`
+   (from `.pdata`) makes it possible to tell a tail call apart from ordinary
+   in-function control flow. This gained `LevelOffset` a genuine extra
+   anchored site and cost nothing in the aggregate survival numbers — but,
+   reported plainly rather than oversold, it did **not** flip either
+   `HideOffset` or `LevelOffset` to confirmed at the 08/19→09/11 boundary.
+   `HideOffset`'s real accessor still wasn't reached by any direct-call or
+   tail-call path in that binary; there was nothing more to widen into.
+
+2. **The actual answer: `resolve` now shows you the competing code.** For
+   every `UNCONFIRMED` field, `resolve` disassembles a window at each
+   distinct candidate value's site — the new binary always, and the *old*
+   binary too when it's still on disk (via `sigdb["meta"]["source_binary"]` +
+   a sha256 check), side by side. This is the exact manual technique
+   `known/2026-08-19.json`'s provenance describes doing by hand
+   ("eyeballing that the surrounding disassembly is the literal same code
+   shape"), just automated far enough that most cases don't need a
+   disassembler opened separately. Turns "wait days for a published list"
+   into "read a few lines of asm now." `LevelOffset`'s three candidates make
+   this trivial — one is an obviously stale value, one is a clean
+   byte-identical continuation. `HideOffset` is the honest counterexample:
+   both `0x314` and the true `0x504` show equally clean byte-identical
+   continuations of their own old sites, because this patch reorganized both
+   regions. The tool cannot manufacture certainty that isn't there; showing
+   the real code is the ceiling of what static analysis can hand you without
+   game-semantic knowledge of what each accessor is for.
+
+3. **`--best-effort`, opt-in, for when a number now beats none.** Applies the
+   raw plurality instead of falling back to `--known`, labeled `BEST-EFFORT`
+   in the console output (never silently merged with confirmed fields — MySEQ's
+   ini format has no comment syntax to flag it inside the file itself, which
+   is why this is off by default rather than a quieter warning). Its own
+   `--help` text states the real, measured risk rather than hedging: on
+   `HideOffset` above, best-effort's plurality (`0x314`) would have been
+   **wrong** — 2 stale votes outvoting the 1 correct one. `LevelOffset`'s
+   plurality happened to be right. Do not present this flag as safe; it isn't,
+   and the honest framing is what makes it trustworthy to reach for when the
+   risk is acceptable.
+
+Aggregate anchor-kind survival now spans two boundaries (`crosscheck_report.json`):
+root 99%, this 97%, link/rip_global 100%, linkseed 94% — every wrong vote
+observed so far, across both boundaries, traces to `linkseed`. That is
+exactly why it stays the weakest tier and never gets to be the sole evidence
+against dissenting stronger-tier votes.
+
+### 3c. A standing artifact for UNCONFIRMED fields, and remembered `update` paths (2026-09-16)
+
+Two follow-ups to 3b, both requested directly rather than guessed at:
+
+1. **`eqoffsets/review.py` — the candidate comparison as a file, not just
+   console scrollback.** `resolve`/`update` write `eqoffsets_review.md`
+   whenever a struct field ends UNCONFIRMED or BEST-EFFORT: a summary
+   table, then per field every candidate's old/new disassembly windows,
+   then a short "how to resolve this by hand" walkthrough. Built from the
+   exact same report dicts (`build_field_report`) the console printer
+   consumes (`cli._print_candidates`), specifically so the two can never
+   drift into saying different things about the same field — a real risk
+   the first version of this (inline printing duplicated between
+   `cmd_resolve` and `cmd_update`) would have created. `_evaluate_struct_fields`
+   is the other half of that convergence: one shared accept/fallback
+   decision function replacing what used to be two separately-maintained
+   copies (`cmd_resolve`'s inline version and `_resolve_struct_offsets`).
+
+2. **`eqoffsets/config.py` — `update` remembers `--exe`/`--myseq-dir`.**
+   Plain JSON at `~/.eqoffsets/config.json` (temp-file-then-rename to avoid
+   a truncated write on crash). An explicit CLI value always overrides for
+   that run *and* becomes the new remembered value, so redirecting the tool
+   at a new install is a one-time thing, never a recurring flag. A
+   remembered path that no longer resolves (`os.path.isfile`/`isdir`) is
+   never trusted silently — `_remembered_path` re-prompts instead, since a
+   stale path pointing at last patch's binary would be exactly the kind of
+   silent-wrong-input CLAUDE.md's invariants exist to prevent elsewhere.
+
+Also folded into this pass: the README was restructured so "how to use
+this" (Quick start, Reading the output, If a field says UNCONFIRMED, Known
+limits) comes first and needs no background, with all the anchoring
+rationale, the manual from-scratch signature-building runbook, and the
+measured survival numbers demoted below a clear `---` divider as
+"Internals and manual workflow." Do not let that divider erode over
+time — the whole point was that a first-time reader never has to scroll
+past derivation theory to find out what a `SPLIT` result means.
 
 ---
 

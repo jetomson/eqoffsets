@@ -27,7 +27,10 @@ from eqoffsets.buildinfo import extract_build_string
 from eqoffsets.codemap import CodeMap, function_ranges
 from eqoffsets.anchor import StructKind, find_anchored_sites
 from eqoffsets.cli import (_check_pair, _norm_value, _ini_up_to_date, _latest_pair,
-                           _parse_disp, _format_disp)
+                           _parse_disp, _format_disp, _evaluate_struct_fields,
+                           _remembered_path)
+from eqoffsets import config as pathconfig
+from eqoffsets.review import gather_candidates, build_field_report, build_markdown
 
 
 class FakeImage:
@@ -132,6 +135,10 @@ def call_mem_rax_disp32(d):
 
 def call_rel32(from_va, to_va):
     return b"\xe8" + struct.pack("<i", to_va - (from_va + 5))   # call rel32   len 5
+
+
+def jmp_rel32(from_va, to_va):
+    return b"\xe9" + struct.pack("<i", to_va - (from_va + 5))   # jmp rel32    len 5
 
 
 def unique_trailer(tag):
@@ -477,6 +484,91 @@ def test_anchor_follows_this_pointer_into_callee():
     print("  anchoring follows `this` through a direct call ok")
 
 
+def test_anchor_follows_this_through_tail_call_jmp():
+    """MSVC compiles a trivial one-line forwarder as a tail call: `jmp` straight
+    to the callee's entry point instead of `call`+`ret`. That still passes
+    `this` in rcx, so it has to propagate trust the same way a direct call
+    does -- this is what let LevelOffset pick up an extra anchored site
+    across the real 08/19->09/11/2026 boundary. An ordinary `jmp` used for
+    in-function control flow must NOT trigger this -- it targets some address
+    inside the current function, never another function's entry point, which
+    is exactly the distinction `codemap.function_starts` exists to draw."""
+    text_va = 0x140001000
+    global_va = 0x140800100
+    field = 0x300
+
+    caller_off, callee_off = 0x00, 0x20
+    caller_va, callee_va = text_va + caller_off, text_va + callee_off
+
+    text = bytearray(b"\xcc" * 0x40)
+    text[caller_off:caller_off + 7] = mov_rcx_rip(global_va - (caller_va + 7))
+    text[caller_off + 7:caller_off + 12] = jmp_rel32(caller_va + 7, callee_va)
+
+    body = movzx_eax_rcx_disp32(field) + unique_trailer(0x6262)
+    text[callee_off:callee_off + len(body)] = body
+
+    data = bytearray(0x40000)
+    img = FakeImage(text_va, bytes(text), 0x140800000, bytes(data),
+                    functions=[(caller_va, caller_va + 0x20), (callee_va, callee_va + 0x20)])
+
+    kind = StructKind(name="spawn", root_globals={global_va}, link_disps=set(),
+                      field_disps={field})
+    anchored = find_anchored_sites(img, [kind], want={"spawn": {field}})
+    sites = anchored.get("spawn", {}).get(field, [])
+    assert sites, "tail-call jmp did not propagate `this` into the callee"
+    assert all(s.anchor == "this" for s in sites), \
+        f"expected a 'this' anchor via the tail call, got {[s.anchor for s in sites]}"
+    print("  anchoring follows `this` through a tail-call jmp ok")
+
+
+def test_disasm_window_and_match_va():
+    """The UNCONFIRMED-field diagnostic (cli.py's _dissent_windows) depends on
+    two things: resolve.py recording exactly where each signature matched,
+    and CodeMap being able to hand back readable disassembly there. Both are
+    what let a person judge a disagreeing vote by eye instead of waiting on
+    someone else's published list.
+
+    Uses mov_eax_rip specifically (a bare 6-byte `8B 05 disp32`, no REX
+    prefix) rather than build_image's default encoder mix: a REX.W-prefixed
+    7-byte RIP form's *target arithmetic* is byte-identical to the same
+    bytes read one byte later as a REX-less 6-byte form (dropping the prefix
+    shortens insn_len by exactly the byte it removes from insn_va), so
+    find_refs's backward search can legitimately land a site one byte off
+    from where linear disassembly from a function's start would put it.
+    That is a real, harmless ambiguity in which alias gets treated as "the"
+    instruction -- both compute the correct target -- but it means such a
+    site is the wrong fixture for a test asserting alignment against a
+    from-the-start linear decode. The 6-byte form has no such alias.
+    """
+    text_va = 0x140001000
+    target = 0x140801234
+    text = bytearray(b"\x90" * 0x10)
+    text += mov_eax_rip(target - (text_va + 0x10 + 6))
+    text += unique_trailer(0x9191)
+    old = FakeImage(text_va, bytes(text), 0x140800000, bytes(0x1000))
+
+    sigs = build_offset_signatures(old, "CharInfo", target, verbose=False)
+    assert sigs, "no signature built"
+    res = resolve_offset(old, "CharInfo", sigs)
+    assert res.ok
+    for sid in res.votes:
+        assert sid in res.match_va, f"{sid} matched but recorded no site address"
+
+    cm = CodeMap(old)
+    some_va = next(iter(res.match_va.values()))
+    assert some_va == text_va + 0x10, \
+        f"expected the site at 0x{text_va + 0x10:X}, got 0x{some_va:X}"
+    window = cm.disasm_window(some_va)
+    assert window, "disasm_window found nothing at a real match site"
+    assert any(insn.address == some_va for insn in window), \
+        "disasm_window's result doesn't include the requested address itself"
+
+    # An address with no .pdata-backed function around it (this FakeImage has
+    # none) must come back empty, not raise or fabricate a window.
+    assert cm.disasm_window(0x140999999) == []
+    print("  disasm_window/match_va wiring for the UNCONFIRMED diagnostic ok")
+
+
 def test_vtable_call_is_not_a_struct_field():
     """`call qword ptr [rax+0x90]` indexes a vtable, not a data member. The
     only GroundItem.YOffset signature to vote wrong across the real
@@ -589,6 +681,106 @@ def test_struct_offset_radix_round_trip():
         for value in (0, 8, 12, 0x210, 0x10f8):
             assert _parse_disp(_format_disp(value, radix), radix) == value
     print("  struct offset radix round trip ok")
+
+
+def test_review_report_and_markdown():
+    """The manual-review doc (review.py) is what lets someone resolve an
+    UNCONFIRMED field themselves instead of waiting for a published list --
+    this drives the real build->resolve->report pipeline end to end with a
+    fixture engineered to genuinely disagree, the same way HideOffset did
+    for real across the 08/19->09/11/2026 boundary."""
+    old_disp = 0x300
+    trailer_a = unique_trailer(0xAAAA)
+    trailer_b = unique_trailer(0xBBBB)
+
+    def make(disp_a, disp_b, lead_pad):
+        text = bytearray(b"\x90" * lead_pad)
+        text += bytes.fromhex("48 8B 40 10")                          # mov rax, [rax+0x10]
+        text += bytes.fromhex("0F B6 88") + struct.pack("<i", disp_a)  # movzx ecx, byte [rax+d]
+        text += trailer_a
+        text += bytes.fromhex("48 8B 40 10")
+        text += bytes.fromhex("0F B6 90") + struct.pack("<i", disp_b)  # movzx edx, byte [rax+d]
+        text += trailer_b
+        return FakeImage(0x140001000, bytes(text), 0x140800000, bytes(0x1000))
+
+    old = make(old_disp, old_disp, lead_pad=0x10)
+    new = make(0x150, 0x160, lead_pad=0x37)   # same old site, two different new values -> disagreement
+
+    sigs = build_struct_offset_signatures(
+        old, "SomeField", old_disp, safe_disps={0x10}, trusted_globals=set(), verbose=False)
+    assert len(sigs) >= 2, "need at least 2 disagreeing signatures for this fixture"
+
+    res = resolve_all(new, {"offsets": {"SomeField": {"signatures": sigs}}})["SomeField"]
+    assert res.ok and not res.consistent, "fixture should produce genuine disagreement"
+
+    rep = build_field_report(
+        "Test.SomeField", res, radix=16, signatures=sigs, format_disp=_format_disp,
+        codemap=CodeMap(new), old_codemap=CodeMap(old),
+        known_val="0x300", status="unconfirmed", why=res.summary())
+
+    assert len(rep["candidates"]) >= 2
+    assert {c["value"] for c in rep["candidates"]} == {0x150, 0x160}
+    for c in rep["candidates"]:
+        assert c["new_window"], f"missing new-binary window for candidate 0x{c['value']:x}"
+        assert c["old_window"], f"missing old-binary window for candidate 0x{c['value']:x}"
+
+    md = build_markdown([rep], meta={"binary": "fake.exe"})
+    assert "Test.SomeField" in md
+    assert "0x150" in md and "0x160" in md
+    assert "old binary, as originally derived" in md
+    assert "this binary" in md
+    assert "How to resolve this by hand" in md
+
+    assert build_field_report(
+        "X", None, 16, [], _format_disp, None, None, "0x1", "unconfirmed", "no signatures"
+    )["candidates"] == [], "no Resolution/votes should degrade to zero candidates, not raise"
+    assert "Nothing needs manual review" in build_markdown([])
+    print("  review report + markdown rendering ok")
+
+
+def test_config_round_trip():
+    """update's remembered exe/myseq-dir paths -- missing file, merge-not-
+    replace on repeated saves, and a corrupt file must never crash the tool,
+    just fall back to 'nothing remembered yet'."""
+    with tempfile.TemporaryDirectory() as tmp:
+        path = os.path.join(tmp, "nested", "config.json")
+        assert pathconfig.load(path) == {}, "missing file should load empty, not raise"
+
+        pathconfig.save({"exe_path": "/a/eqgame.exe"}, path)
+        assert pathconfig.load(path) == {"exe_path": "/a/eqgame.exe"}
+
+        pathconfig.save({"myseq_dir": "/b/myseq"}, path)
+        assert pathconfig.load(path) == {"exe_path": "/a/eqgame.exe", "myseq_dir": "/b/myseq"}, \
+            "save should merge into the existing file, not replace it"
+
+        with open(path, "w") as fh:
+            fh.write("not json{{{")
+        assert pathconfig.load(path) == {}, "corrupt file should load empty, not raise"
+    print("  config round trip (missing/merge/corrupt) ok")
+
+
+def test_remembered_path_precedence():
+    """--exe/--myseq-dir on the command line always wins; otherwise a still-
+    valid remembered path is used silently; a remembered path that no longer
+    exists (moved install, reinstalled game) must trigger a re-prompt rather
+    than being trusted blindly."""
+    with tempfile.TemporaryDirectory() as tmp:
+        real = os.path.join(tmp, "real.exe")
+        open(real, "w").close()
+        missing = os.path.join(tmp, "gone.exe")
+
+        path, ask = _remembered_path(real, missing, os.path.isfile, "exe")
+        assert path == real and not ask, "explicit CLI value must win over a remembered one"
+
+        path, ask = _remembered_path(None, real, os.path.isfile, "exe")
+        assert path == real and not ask, "a still-valid remembered path should not re-prompt"
+
+        path, ask = _remembered_path(None, missing, os.path.isfile, "exe")
+        assert path is None and ask, "a stale remembered path must trigger a re-prompt"
+
+        path, ask = _remembered_path(None, None, os.path.isfile, "exe")
+        assert path is None and ask, "nothing given or remembered must prompt"
+    print("  remembered-path precedence (cli > valid remembered > reprompt) ok")
 
 
 def test_build_string_extraction():

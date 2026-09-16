@@ -17,6 +17,7 @@ class Resolution:
     def __init__(self, name):
         self.name = name
         self.votes = {}          # sig_id -> value
+        self.match_va = {}       # sig_id -> VA where its pattern matched
         self.failures = {}       # sig_id -> reason
         self.value = None
         self.agreement = 0
@@ -120,6 +121,10 @@ def resolve_offset(image, name, signatures):
             res.failures[sig_id] = "extraction failed"
             continue
         res.votes[sig_id] = value
+        # Every signature's pattern starts at its site instruction, so the
+        # match offset is also that instruction's address -- exactly where a
+        # human would want to look to judge a disagreeing vote by eye.
+        res.match_va[sig_id] = sec.va + off
 
     if res.votes:
         counts = Counter(res.votes.values())

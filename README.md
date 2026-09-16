@@ -8,6 +8,159 @@ running process, so it works fine on Linux against a Wine prefix.
 
 ---
 
+## Quick start
+
+You don't need to understand how any of this works to use it. Three steps:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+python3 -m eqoffsets.cli update
+```
+
+`update` asks two questions the first time you run it -- the path to your
+`eqgame.exe`, and the path to your MySEQ install folder (where
+`myseqserver.ini` lives) -- then:
+
+1. remembers both paths (in `~/.eqoffsets/config.json`), so it won't ask
+   again next time. Pass `--exe`/`--myseq-dir` any time you need to point it
+   somewhere else; doing so also updates what it remembers, so you only ever
+   have to give a new path once. Delete the config file, or pass a fresh
+   `--config <path>`, to reset;
+2. resolves every offset it can against your binary;
+3. either tells you your existing `myseqserver.ini` already matches (nothing
+   written), or shows you exactly what would change and asks for a `y` before
+   overwriting it in place. Your `[Port]` line is always preserved;
+4. if a struct field couldn't be independently confirmed this run, it's
+   carried forward from the last known-good value rather than guessed, and
+   called out by name -- see "If a field says UNCONFIRMED" below.
+
+`--yes` skips the confirmation prompt, for scripted use.
+
+That's the whole workflow for almost everyone. Everything past this point is
+either a quick reference for reading the output, or the deeper internals for
+someone extending or auditing the tool -- skip straight to "Known limits" if
+you just want to know what to watch out for.
+
+---
+
+## Reading the output
+
+- **`unanimous`** — every signature agreed. Good, nothing to check.
+- **`SPLIT`** — signatures disagreed, but a majority still won. Usually
+  fine (see "Known limits"), worth a glance if you're being careful.
+- **`FAILED`** / **`UNRESOLVED`** — no signature matched at all. `update`
+  will refuse to touch your INI if this happens to a `[Memory Offsets]`
+  entry; the bundled signature set is too old for this client and needs
+  refreshing (see "Building your own signature set" below, or wait for an
+  updated eqoffsets release).
+- **`ERROR ... lands in executable section`** — a signature matched the
+  wrong instruction. Do not use that result; something is wrong with the
+  input, not just thin evidence.
+- **`UNCONFIRMED`** (struct fields only, e.g. `[SpawnInfo Offsets]`) — the
+  field's signatures either found nothing or actively disagreed, so the
+  last known-good value was kept instead of guessing. See the next section.
+
+---
+
+## If a field says UNCONFIRMED
+
+This is the case the whole project exists to handle without making you wait
+on someone else. When it happens, look for `eqoffsets_review.md` --
+`update` writes it next to your `myseqserver.ini`; `resolve` (see below)
+writes it next to whatever `--out-ini` you gave it, or to
+`./eqoffsets_review.md` otherwise; either way, the console output tells you
+exactly where.
+
+That file lists every candidate value the tool found, how many signatures
+voted for each one, and the actual surrounding assembly for each candidate
+-- the old binary's code where it was originally derived, next to the new
+binary's code where it matched now, side by side. In most cases one
+candidate is an obvious clean continuation of the same code and the others
+are stale or coincidental; picking the right one is a ten-second read, not
+a disassembly session. A short worked example:
+
+```
+### candidate `0x270` -- 4 vote(s): LevelOffset#2, ... [root]
+
+old binary, as originally derived:
+    -> mov byte ptr [rcx + 0x210], al
+
+this binary:
+    -> mov byte ptr [rcx + 0x270], al
+```
+
+Once you've picked the right value:
+
+1. Edit your known-offsets file (`known/<date>.json`) and set that field.
+2. Re-run `update` (or `resolve`, if you're doing this the manual way) --
+   the carried-forward value was only ever a starting point.
+
+Occasionally the code alone won't settle it -- multiple candidates look
+like equally clean continuations of their own old site, because the patch
+reorganized more than one region at once. That is a genuine ambiguity, not
+a tool failure; the review doc says so plainly rather than picking one for
+you, and at that point you either need to dig one level further (e.g. what
+does a nearby `call` target actually do) or fall back to a published list
+after all.
+
+If you'd rather have the tool just pick a value automatically instead of
+asking you, `resolve --best-effort` applies the plurality vote and labels
+it `BEST-EFFORT` everywhere instead of falling back. Read `--help` before
+using it: it states a real measured case where the plurality was wrong, not
+a theoretical warning.
+
+---
+
+## Known limits
+
+- **A struct field near the disp8/disp32 boundary** (roughly `0x80`) can
+  flip encoding width across a patch, which changes the *length* of every
+  instruction that touches it. Its signatures then stop matching entirely
+  and it comes back unresolved rather than wrong -- expected, but it's the
+  field most likely to need a manual look after a big struct reorg.
+- **A field at offset 0** (e.g. `GroundItem.PrevOffset`) is often encoded
+  with no displacement bytes at all, so there's nothing to read back except
+  from sites where the compiler happened to emit an explicit zero.
+- **`SPLIT` on a `[Memory Offsets]` value** has, in every real case measured
+  so far, resolved correctly via majority vote once checked against a
+  published list -- but it is still worth a glance, since "measured so far"
+  is two patch boundaries, not a guarantee.
+- **The PE loader is the least-tested seam.** The automated test suite
+  drives the pipeline through a synthetic in-memory image; it doesn't
+  exercise real `pefile` parsing. First run against a real binary, glance at
+  the section list it prints.
+- **Addresses are preferred-base VAs** (`image_base + rva`, i.e. `0x140...`),
+  matching how published MySEQ lists are normally written. If a list ever
+  gives RVAs instead, add `0x140000000` before putting them in a
+  known-offsets file.
+- **Scoring weights are calibrated on two patch boundaries.** Enough to
+  confidently rank which anchoring strategies work (the gap between the
+  worst and the best is large), not enough to fine-tune anything further.
+
+---
+
+## Legal
+
+Daybreak's terms of service cover third-party tools that read game memory.
+Enforcement lands on the account using them. Your call; just make it
+knowingly.
+
+---
+---
+
+# Internals and manual workflow
+
+Everything below this line is for extending, auditing, or manually
+rebuilding this tool's signature sets -- not needed to just run it.
+
+Run the test suite after any change:
+
+```bash
+python3 tests/test_pipeline.py     # must print 26/26 passed
+```
+
 ## The idea in one paragraph
 
 Addresses move every patch. The *code that references* those addresses barely
@@ -18,22 +171,11 @@ remaining opcode bytes as a fingerprint. Next patch, we search for those
 fingerprints in the new binary and read the new addresses back out of whatever
 we find.
 
-## Why `+0x44E0` never worked
+### Why `+0x44E0` never worked
 
 Adding a constant to every address assumes the whole data segment shifts
 uniformly. It does not. Individual globals move by different amounts, some do
 not move at all, and struct layouts change independently of everything else.
-
----
-
-## Install
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-python3 tests/test_pipeline.py     # must print 21/21 passed
-```
 
 ## Files
 
@@ -48,38 +190,17 @@ python3 tests/test_pipeline.py     # must print 21/21 passed
 | `eqoffsets/structsig.py` | turns anchored sites into signatures for struct member offsets |
 | `eqoffsets/resolve.py` | matches signatures on a new binary, votes |
 | `eqoffsets/validate.py` | sanity checks before anything is emitted |
+| `eqoffsets/review.py` | builds `eqoffsets_review.md` for fields that need a manual look |
+| `eqoffsets/config.py` | remembers `update`'s `--exe`/`--myseq-dir` between runs |
 | `eqoffsets/emit_ini.py` | writes `myseqserver.ini` |
 | `eqoffsets/buildinfo.py` | pulls `ClientHash` (sha1 of the file) and `BuildString` straight out of `eqgame.exe` |
 | `eqoffsets/cli.py` | `build` / `resolve` / `selftest` / `crosscheck` / `update` |
 
----
+## Building your own signature set from scratch
 
-## Runbook
-
-### The easy way: `update`
-
-If you just want to point at your own `eqgame.exe` and MySEQ install and be
-done with it, skip everything below:
-
-```bash
-python3 -m eqoffsets.cli update
-```
-
-It asks two questions -- the path to `eqgame.exe`, and the path to the MySEQ
-install folder -- picks the newest signature set bundled with the package,
-resolves everything against your binary, and either tells you your existing
-`myseqserver.ini` already matches (nothing written) or shows you exactly
-what would change and asks for a yes before overwriting it in place. Your
-existing `[Port]` value is always preserved. `PatchDate`/`ClientHash`/
-`BuildString` are filled in from the binary itself. Struct fields it can't
-independently confirm this run are carried forward from the bundled
-known-offsets file rather than guessed, and are called out explicitly in the
-output. `--exe`/`--myseq-dir`/`--yes` skip the prompts for scripted use.
-
-This is what to hand a friend who has no interest in the rest of this
-document.
-
-### The manual way, if you want to build your own signature set from scratch
+Only needed if you're not using the bundled signature sets under `sigs/` --
+e.g. you're maintaining a fork, or the bundled sets have fallen too far
+behind for `update` to resolve anything.
 
 ### 1. Set up a known-good pair
 
@@ -147,36 +268,16 @@ python3 -m eqoffsets.cli resolve \
   --out-ini myseqserver.ini
 ```
 
+`resolve` is `update`'s explicit, scriptable sibling: same accept/fallback
+policy, but every path is given on the command line instead of asked or
+remembered, and it exposes `--best-effort` and `--review-file` directly.
+
 Then rebuild signatures from the new binary using the offsets you just derived,
 so the database tracks the current build:
 
 ```bash
 python3 -m eqoffsets.cli build --binary <new exe> --known <new offsets> --out sigs/<date>.json
 ```
-
----
-
-## Reading the output
-
-- `unanimous` — every signature agreed. Good.
-- `SPLIT` — signatures disagreed. Majority wins but **check it by hand**;
-  usually one signature matched something unrelated. (For memory offsets this
-  can also just mean some signatures didn't fire while the rest agreed --
-  `resolve`'s own struct-offset section calls that distinction out
-  explicitly; for the `[Memory Offsets]` block, a SPLIT is still worth a
-  manual look either way.)
-- `FAILED` — no signature matched. Re-derive that offset manually and rebuild.
-- `ERROR ... lands in executable section` — a signature matched the wrong
-  instruction. Do not use the result.
-- `UNCONFIRMED` (struct member offsets only) — the field's anchored
-  signatures either found nothing or actively disagreed with each other, so
-  `resolve` carried the `--known` value forward unverified rather than
-  guessing. The printed vote breakdown shows exactly which signatures
-  disagreed.
-
-`resolve` refuses to write an INI if any memory offset is unresolved unless
-you pass `--force`. Struct offsets never block the write -- an unconfirmed
-one just falls back to the known-offsets value instead.
 
 ---
 
@@ -198,7 +299,7 @@ to one. Trust is established five ways, strongest first:
 |---|---|
 | `root` | the register came straight out of a resolved global (`mov rcx,[rip+CharInfo]`, or `lea` when the global *is* the struct) |
 | `link` | walked to another instance through `NextOffset`/`PrevOffset` from an already-trusted register |
-| `this` | a direct `call` made with a trusted register in `rcx`, propagated to a fixpoint -- this is what reaches the accessor methods where the interesting fields actually live |
+| `this` | a direct `call`, or a tail-call `jmp` straight to another function's entry point (MSVC's usual codegen for a one-line forwarder), made with a trusted register in `rcx` -- propagated to a fixpoint, this is what reaches the accessor methods where the interesting fields actually live |
 | `linkseed` | a bare `mov rdx,[rax+PrevOffset]` with nothing behind it; weakest, and the only rule the old implementation had |
 | `shape` | **off by default** -- a register used with several known field offsets. Measured at 82% cross-patch survival against 95-100% for the rest, and it fails specifically by insisting a moved field stayed put. `--struct-shape-anchor` opts in. |
 
@@ -211,62 +312,50 @@ covering 94% of `.text` -- not a guess based on `0xCC` padding.
 (`Resolution.consistent` -- a signature that fails to fire across a patch is
 not the same as one that actively disagrees, and only the latter is treated
 as untrustworthy). Anything unconfirmed is carried forward from `--known`,
-printed as `UNCONFIRMED` with the full vote breakdown, and never silently
-trusted. `selftest` and `crosscheck` score these against ground truth exactly
-the way they score the globals.
+printed as `UNCONFIRMED` with the full vote breakdown and a review doc (see
+"If a field says UNCONFIRMED" above), and never silently trusted. `selftest`
+and `crosscheck` score these against ground truth exactly the way they score
+the globals.
 
 ### Measured result
 
-Signatures built from the 07/17/2026 binary, resolved against 08/19/2026 and
-compared to the published list for that build:
+Two real patch boundaries so far, both built from the older binary and
+scored against a published list for the newer one:
 
 ```
-37 passed, 0 failed     (6 memory offsets + 31 struct fields)
+07/17/2026 -> 08/19/2026:  37 passed, 0 failed   (6 memory offsets + 31 struct fields)
+08/19/2026 -> 09/11/2026:  36 passed, 1 failed
 ```
 
-That includes the six fields the 08/19 patch actually moved --
+The 07/17→08/19 boundary includes the six fields that patch actually moved --
 `LevelOffset` `0x564`→`0x210`, `HideOffset` `0x4d0`→`0x304`,
 `OwnerIDOffset` `0x554`→`0x4b4`, `ClassOffset`, `RaceOffset`,
 `PrimaryOffset`, `OffhandOffset` -- all derived rather than carried forward.
 One field (`GroundItem.IdOffset`) drew a split vote and was correctly
-reported `UNCONFIRMED` rather than claimed. Run `crosscheck` to reproduce it;
-it writes `crosscheck_report.json` with per-signature and per-anchor-kind
-survival rates.
+reported `UNCONFIRMED` rather than claimed.
 
-## Known limits
+The 08/19→09/11 boundary again derived every real shift correctly (including
+`OwnerIDOffset`, `ClassOffset`, `RaceOffset`, `PrimaryOffset`, `OffhandOffset`
+all moving `+8` together) and again correctly declined to guess on the one
+field it couldn't confirm: `SpawnInfo.LevelOffset` split 4-3-1 across three
+candidate values but the plurality (`0x270`) happened to be right; the
+"failure" reported by `selftest`/`crosscheck` is `SpawnInfo.HideOffset`,
+where the plurality was **wrong** -- see "If a field says UNCONFIRMED" above
+for the worked example, since it is the clearest real case yet for why
+`resolve` requires no dissent at all rather than just a majority.
 
-- **A field that crosses the disp8/disp32 boundary** (under `0x80` to over,
-  or back) changes the *length* of every instruction that touches it, so its
-  signatures stop matching entirely and it is reported unresolved. That is the
-  intended outcome -- the fingerprint has genuinely lost the field -- but it
-  means a field sitting near `0x80` is the most likely one to need a manual
-  re-derivation after a big struct reorg.
-- **A field at offset 0** (`GroundItem.PrevOffset`) is encoded with no
-  displacement bytes at all in the common case, so there is nothing to read
-  back. It resolves only from sites where the compiler happened to emit an
-  explicit `disp8` of zero.
-- **Calibration rests on one patch boundary**, the only pair this repo has
-  both binaries for. It is enough to rank the anchor kinds -- the gap between
-  52% and 100% is not noise -- but not to fine-tune scoring weights. Collect
-  more pairs; `crosscheck` is built to consume them.
+Run `crosscheck` to reproduce either boundary; it writes
+`crosscheck_report.json` with per-signature and per-anchor-kind survival
+rates. Aggregated across both boundaries so far:
 
-`build` prints exactly which fields it could and couldn't anchor; `resolve`'s
-`UNCONFIRMED` lines tell you which it carried forward without independent
-confirmation. Read those before trusting an INI blindly, the same as you
-would for `SPLIT` on the memory offsets.
+```
+  anchor              fired   right when fired
+  root         169/204 (82%)      168/169 (99%)
+  this         104/159 (65%)      101/104 (97%)
+  linkseed      72/77  (93%)       68/72  (94%)
+  rip_global    45/54  (83%)       45/45  (100%)
+  link           8/8   (100%)         8/8   (100%)
+```
 
-**The PE loader is the least-tested seam.** The test suite drives the whole
-pipeline through a synthetic in-memory image, which exercises the scanning,
-wildcarding, RIP math and voting, but not `pefile` integration. First run
-against a real binary, eyeball the section list it prints.
-
-**Addresses are preferred-base VAs** (`image_base + rva`, so `0x140...`). That
-matches how published MySEQ lists are written. If a list ever gives you RVAs
-instead, add `0x140000000` before putting them in the known-offsets file.
-
----
-
-## Legal
-
-Daybreak's terms of service cover third-party tools that read game memory.
-Enforcement lands on the account using them. Your call; just make it knowingly.
+Every wrong vote across both boundaries traced back to `linkseed`, the
+weakest anchor tier by design -- exactly what it is scored last for.

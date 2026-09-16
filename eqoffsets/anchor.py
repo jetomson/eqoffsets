@@ -34,9 +34,12 @@ Five ways, in descending order of how much they deserve to be believed
            another spawn.
 
   this     a direct `call` made with a trusted register in rcx means the
-           callee's `this` is that struct. Propagated to a fixpoint, this is
-           what reaches accessor methods, which is where the interesting
-           fields (OwnerID, Hide, the WorldInfo bytes) are actually read.
+           callee's `this` is that struct -- and so does an unconditional
+           `jmp` straight to another function's entry point, which is how
+           MSVC compiles a trivial one-line forwarder as a tail call instead
+           of a real call. Propagated to a fixpoint, this is what reaches
+           accessor methods, which is where the interesting fields (OwnerID,
+           Hide, the WorldInfo bytes) are actually read.
 
   linkseed a bare `mov rdx, [rax+PrevOffset]` where `rax` itself was never
            traced to a root. This is the weakest rule and the only one that
@@ -232,9 +235,21 @@ def analyze_function(codemap, fn_start, fn_end, kinds, entry_taint, want,
                     continue
                 sites.append(AnchoredSite(kind_name, acc, fn_start, fn_end, anchor))
 
-        # --- propagate `this` into direct calls -------------------------
+        # --- propagate `this` into direct calls, and tail-call jmps ------
+        # A `jmp` to another function's entry point is a tail call -- MSVC
+        # emits these constantly for trivial one-line forwarders and thin
+        # accessor wrappers, exactly the kind of function this project needs
+        # to see through to reach the real field read. Recognising it
+        # requires knowing where functions start (fn_starts, from .pdata),
+        # which is why this rule couldn't exist before CodeMap did. An
+        # ordinary `jmp` used for in-function control flow (a loop, an
+        # if/else) never targets another function's start address, so this
+        # does not need to special-case which kind of jmp it is looking at.
         ops = insn.operands
-        if insn.mnemonic == "call" and ops and ops[0].type == X86_OP_IMM:
+        is_call = insn.mnemonic == "call"
+        is_tailcall = insn.mnemonic == "jmp" and ops and ops[0].type == X86_OP_IMM \
+            and ops[0].imm in codemap.function_starts
+        if (is_call or is_tailcall) and ops and ops[0].type == X86_OP_IMM:
             passed = dict(taint.get(RCX, {}))
             _merge(passed, shape.get(RCX, {}))
             if passed:

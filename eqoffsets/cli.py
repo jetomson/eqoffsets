@@ -15,6 +15,8 @@ from .resolve import resolve_all
 from .validate import validate_all, validate_struct_offset, print_report
 from .emit_ini import write_ini
 from .buildinfo import client_hash as extract_client_hash, extract_build_string
+from .review import build_field_report, write_markdown
+from . import config as pathconfig
 
 # How each INI section's struct is reached from an already-resolved global,
 # and how its values are written.
@@ -215,6 +217,109 @@ def cmd_build(args):
 
 # -------------------------------------------------------------- resolve
 
+def _load_source_codemap(sigdb):
+    """Best-effort CodeMap for the binary sigs.json was built from, so an
+    UNCONFIRMED field's diagnostic can show the ORIGINAL site next to each
+    new-binary candidate -- the same side-by-side "is this the same code
+    shape" comparison known/2026-08-19.json's provenance describes doing by
+    hand. Returns None quietly if the binary has moved, been deleted, or
+    changed (sha256 mismatch) -- this is a nice-to-have, never a requirement.
+    """
+    meta = sigdb.get("meta", {})
+    path = meta.get("source_binary")
+    want_sha = meta.get("sha256", "").lower()
+    if not path or not os.path.isfile(path):
+        return None
+    if want_sha and sha256(path).lower() != want_sha:
+        return None
+    try:
+        return CodeMap(PEImage(path))
+    except Exception:
+        return None
+
+
+def _default_review_path(out_ini):
+    """Next to --out-ini if one was given, else the current directory --
+    somewhere a person running `resolve` will actually look, without
+    needing a flag for the common case.
+    """
+    if out_ini:
+        return os.path.join(os.path.dirname(os.path.abspath(out_ini)), "eqoffsets_review.md")
+    return "eqoffsets_review.md"
+
+
+def _evaluate_struct_fields(image, sigdb, static, best_effort=False):
+    """Apply the confirm / best-effort / fallback policy to every struct
+    field, overlaying `static` in place, and return one result dict per
+    field: {key, sec_name, field, label, radix, status, value, why,
+    known_val, r, signatures}.
+
+    `status` is "confirmed", "best_effort", or "unconfirmed". Shared by
+    cmd_resolve (verbose reporting) and cmd_update (terse reporting, and
+    never best_effort -- see cmd_update's own note) so the actual
+    accept/fallback decision, and the data behind an UNCONFIRMED or
+    BEST-EFFORT field's review report, can never drift between the two the
+    way the old separately-maintained copies of this logic eventually would
+    have.
+    """
+    struct_sigs = sigdb.get("struct_offsets", {})
+    if not struct_sigs:
+        return []
+    struct_resolutions = resolve_all(image, {"offsets": struct_sigs})
+
+    results = []
+    for key, entry in struct_sigs.items():
+        sec_name = entry.get("section", "SpawnInfo Offsets")
+        field = entry.get("field", key)
+        radix = entry.get("radix", STRUCT_SECTIONS.get(sec_name, {}).get("radix", 16))
+        signatures = entry.get("signatures", [])
+        r = struct_resolutions.get(key)
+        problems = validate_struct_offset(field, r.value if (r and r.ok) else None)
+        known_val = static.get(sec_name, {}).get(field)
+        label = f"{sec_name.split()[0]}.{field}"
+
+        if r and r.ok and r.consistent and not problems:
+            value = _format_disp(r.value, radix)
+            status = "confirmed"
+            why = "unanimous" if r.unanimous else f"{r.agreement}/{r.agreement} fired, no dissent"
+            static.setdefault(sec_name, {})[field] = value
+        elif best_effort and r and r.ok and not problems:
+            value = _format_disp(r.value, radix)
+            status = "best_effort"
+            why = f"{r.agreement}/{len(r.votes)} agree -- NOT independently confirmed"
+            static.setdefault(sec_name, {})[field] = value
+        else:
+            value = known_val if known_val is not None else "?"
+            status = "unconfirmed"
+            why = problems[0] if problems else (r.summary() if r else "no signatures")
+
+        results.append({
+            "key": key, "sec_name": sec_name, "field": field, "label": label,
+            "radix": radix, "status": status, "value": value, "why": why,
+            "known_val": known_val, "r": r, "signatures": signatures,
+        })
+    return results
+
+
+def _print_candidates(rep):
+    """Console rendering of one review.build_field_report() dict -- kept in
+    lockstep with the Markdown version because both read the same data.
+    """
+    for c in rep["candidates"]:
+        print(f"      candidate {c['value_str']} ({len(c['sids'])} vote(s): "
+              f"{', '.join(c['sids'])}), e.g. {c['rep']} [{c['anchor']}]")
+        if c["old_window"]:
+            print("          old binary, as originally derived:")
+            for line in c["old_window"]:
+                print(f"            {line}")
+        if c["new_window"]:
+            print("          this binary:")
+            for line in c["new_window"]:
+                print(f"            {line}")
+        if not c["old_window"] and not c["new_window"]:
+            print("          (could not recover disassembly context here)")
+
+
 def cmd_resolve(args):
     sigdb = load_json(args.sigs)
     known = load_json(args.known) if args.known else {}
@@ -233,48 +338,63 @@ def cmd_resolve(args):
         print(f"DISAGREEMENT (review before use): {', '.join(split)}")
 
     # Struct member offsets: start from --known verbatim (old behavior), then
-    # overlay any field this binary's own signatures confirm unanimously.
+    # overlay any field this binary's own signatures confirm with no dissent.
     # A field that resolves but disagrees, or that has no signatures at all
     # (old sigs.json, or structsig couldn't anchor it), keeps the --known
-    # value and is flagged as unverified rather than silently trusted.
+    # value and is flagged as unverified rather than silently trusted --
+    # unless --best-effort says to take the plurality anyway; see its help
+    # text for the real, measured risk of that.
     static = {sec: dict(fields) for sec, fields in known.get("static_sections", {}).items()}
     struct_sigs = sigdb.get("struct_offsets", {})
-    struct_undetermined = []
+    review_reports = []
     if struct_sigs:
-        struct_resolutions = resolve_all(image, {"offsets": struct_sigs})
+        codemap = CodeMap(image)
+        # Nice-to-have: lets the UNCONFIRMED diagnostic show each candidate's
+        # ORIGINAL site next to its new-binary match, so a real side-by-side
+        # comparison is possible instead of judging the new site in isolation.
+        old_codemap = _load_source_codemap(sigdb)
+        results = _evaluate_struct_fields(image, sigdb, static, best_effort=args.best_effort)
         print("\n--- struct member offsets (anchored derivation) ---")
-        for key, entry in struct_sigs.items():
-            sec_name = entry.get("section", "SpawnInfo Offsets")
-            field = entry.get("field", key)
-            radix = entry.get("radix", STRUCT_SECTIONS.get(sec_name, {}).get("radix", 16))
-            r = struct_resolutions.get(key)
-            problems = validate_struct_offset(field, r.value if (r and r.ok) else None)
-            known_val = static.get(sec_name, {}).get(field)
-            label = f"{sec_name.split()[0]}.{field}"
-
-            if r and r.ok and r.consistent and not problems:
-                new_val = _format_disp(r.value, radix)
+        for res in results:
+            label, radix, r, why = res["label"], res["radix"], res["r"], res["why"]
+            if res["status"] == "confirmed":
                 tag = ""
-                if known_val is not None and str(known_val).lower() != new_val.lower():
-                    tag = f"  (known-offsets had {known_val} -- updating)"
-                agree_tag = ("unanimous" if r.unanimous
-                             else f"{r.agreement}/{r.agreement} fired, no dissent")
-                print(f"  {label}: {new_val} [{agree_tag}]{tag}")
-                static.setdefault(sec_name, {})[field] = new_val
+                if (res["known_val"] is not None
+                        and str(res["known_val"]).lower() != res["value"].lower()):
+                    tag = f"  (known-offsets had {res['known_val']} -- updating)"
+                print(f"  {label}: {res['value']} [{why}]{tag}")
+                continue
+
+            rep = build_field_report(label, r, radix, res["signatures"], _format_disp,
+                                     codemap, old_codemap, res["known_val"],
+                                     res["status"], why, applied_val=res["value"])
+            review_reports.append(rep)
+            if res["status"] == "best_effort":
+                print(f"  {label}: {res['value']} [BEST-EFFORT, {why}]")
             else:
-                fallback = known_val if known_val is not None else "?"
-                why = problems[0] if problems else (r.summary() if r else "no signatures")
-                print(f"  {label}: UNCONFIRMED ({why}) -- keeping known-offsets value {fallback}")
+                print(f"  {label}: UNCONFIRMED ({why}) -- keeping known-offsets value "
+                      f"{res['value']}")
                 if r:
                     for sid, val in r.votes.items():
                         tag = "" if val == r.value else "  <- disagrees"
                         print(f"      - {sid}: voted {_format_disp(val, radix)}{tag}")
                     for sid, reason in r.failures.items():
                         print(f"      - {sid}: {reason}")
-                struct_undetermined.append(f"{sec_name}.{field}")
+            _print_candidates(rep)
+
+        struct_undetermined = [res["label"] for res in results if res["status"] == "unconfirmed"]
+        struct_best_effort = [res["label"] for res in results if res["status"] == "best_effort"]
         if struct_undetermined:
             print(f"unconfirmed struct field(s), carried forward unverified: "
                   f"{', '.join(struct_undetermined)}")
+        if struct_best_effort:
+            print(f"BEST-EFFORT struct field(s) applied without independent confirmation: "
+                  f"{', '.join(struct_best_effort)} -- verify these by hand before trusting them")
+        if review_reports:
+            review_path = args.review_file or _default_review_path(args.out_ini)
+            write_markdown(review_path, review_reports, meta={"binary": args.binary})
+            print(f"wrote {review_path} -- candidate values and code for each field above, "
+                  f"for manual review")
 
     if args.out_ini:
         if failed and not args.force:
@@ -705,31 +825,19 @@ def _ini_up_to_date(ini_cp, memory, static):
     return True
 
 
-def _resolve_struct_offsets(image, sigdb, static):
-    """Overlay confidently-derived struct fields onto `static` in place (same
-    accept/fallback policy as cmd_resolve: r.consistent, not mere r.ok) and
-    return a list of (section, field, status) for reporting. Duplicated from
-    cmd_resolve's inline version rather than shared, deliberately -- this
-    command has different, terser reporting needs and the two are small
-    enough that a shared abstraction wasn't worth the indirection.
+def _remembered_path(cli_value, remembered_value, check, what):
+    """cli_value wins if given (and becomes the new remembered value); else
+    fall back to a remembered path from config.py, but only if it still
+    checks out -- a stale remembered path (moved install, reinstalled game)
+    must not be trusted silently. Returns (path_or_None, came_from_prompt).
     """
-    notes = []
-    struct_sigs = sigdb.get("struct_offsets", {})
-    if not struct_sigs:
-        return notes
-    struct_resolutions = resolve_all(image, {"offsets": struct_sigs})
-    for key, entry in struct_sigs.items():
-        sec_name = entry.get("section", "SpawnInfo Offsets")
-        field = entry.get("field", key)
-        radix = entry.get("radix", STRUCT_SECTIONS.get(sec_name, {}).get("radix", 16))
-        r = struct_resolutions.get(key)
-        problems = validate_struct_offset(field, r.value if (r and r.ok) else None)
-        if r and r.ok and r.consistent and not problems:
-            static.setdefault(sec_name, {})[field] = _format_disp(r.value, radix)
-            notes.append((sec_name, field, "confirmed"))
-        else:
-            notes.append((sec_name, field, "unconfirmed"))
-    return notes
+    if cli_value:
+        return cli_value, False
+    if remembered_value and check(remembered_value):
+        return remembered_value, False
+    if remembered_value:
+        print(f"  (remembered {what} no longer exists, asking again: {remembered_value})")
+    return None, True
 
 
 def cmd_update(args):
@@ -744,16 +852,34 @@ def cmd_update(args):
     print(f"eqoffsets update -- using {os.path.basename(sigs_path)} "
           f"(patch {known.get('patch_date', '?')})\n")
 
-    exe_path = args.exe or _prompt_existing_path("Path to your eqgame.exe: ", "file")
+    # --exe/--myseq-dir always override; otherwise fall back to whatever was
+    # remembered from a previous run, and only prompt if there's nothing
+    # usable either way. Whatever we end up with gets (re-)saved below, so
+    # an override on the command line becomes the new default for next time
+    # without needing to edit the config file by hand.
+    remembered = pathconfig.load(args.config)
+    exe_path, ask_exe = _remembered_path(
+        args.exe, remembered.get("exe_path"), os.path.isfile, "eqgame.exe path")
+    if ask_exe:
+        exe_path = _prompt_existing_path("Path to your eqgame.exe: ", "file")
     if not exe_path:
         print("cancelled")
         return 1
 
-    myseq_dir = args.myseq_dir or _prompt_existing_path(
-        "Path to your MySEQ install folder (where myseqserver.ini lives): ", "dir")
+    myseq_dir, ask_dir = _remembered_path(
+        args.myseq_dir, remembered.get("myseq_dir"), os.path.isdir, "MySEQ folder")
+    if ask_dir:
+        myseq_dir = _prompt_existing_path(
+            "Path to your MySEQ install folder (where myseqserver.ini lives): ", "dir")
     if not myseq_dir:
         print("cancelled")
         return 1
+
+    pathconfig.save({"exe_path": exe_path, "myseq_dir": myseq_dir}, args.config)
+    print(f"eqgame.exe : {exe_path}")
+    print(f"MySEQ dir  : {myseq_dir}")
+    print(f"  (remembered in {args.config} -- pass --exe/--myseq-dir to point elsewhere, "
+          f"or delete that file to be asked again)\n")
 
     ini_path = os.path.join(myseq_dir, "myseqserver.ini")
     image = open_image(exe_path)
@@ -770,7 +896,28 @@ def cmd_update(args):
     memory = {n: r.value for n, r in resolutions.items() if r.ok}
 
     static = {sec: dict(fields) for sec, fields in known.get("static_sections", {}).items()}
-    struct_notes = _resolve_struct_offsets(image, sigdb, static)
+    struct_results = _evaluate_struct_fields(image, sigdb, static, best_effort=False)
+    confirmed = [res for res in struct_results if res["status"] == "confirmed"]
+    unconfirmed = [res for res in struct_results if res["status"] == "unconfirmed"]
+
+    if struct_results:
+        print(f"struct member offsets: {len(confirmed)}/{len(struct_results)} "
+              f"confirmed against this binary")
+    review_path = None
+    if unconfirmed:
+        labels = [res["label"] for res in unconfirmed]
+        print(f"carried forward unverified: {', '.join(labels)}")
+        codemap = CodeMap(image)
+        old_codemap = _load_source_codemap(sigdb)
+        reports = [
+            build_field_report(res["label"], res["r"], res["radix"], res["signatures"],
+                               _format_disp, codemap, old_codemap, res["known_val"],
+                               "unconfirmed", res["why"])
+            for res in unconfirmed
+        ]
+        review_path = os.path.join(myseq_dir, "eqoffsets_review.md")
+        write_markdown(review_path, reports, meta={"binary": exe_path})
+        print(f"see {review_path} for the candidate values and code to check by hand\n")
 
     existing = configparser.ConfigParser()
     have_existing = os.path.isfile(ini_path)
@@ -808,14 +955,6 @@ def cmd_update(args):
     for n, v in memory.items():
         tag = "" if n in old_memory and _norm_value(old_memory[n]) == v else "  <- changed"
         print(f"  {n} = 0x{v:X}{tag}")
-    confirmed = [n for n in struct_notes if n[2] == "confirmed"]
-    unconfirmed = [f"{sec}.{field}" for sec, field, status in struct_notes
-                   if status == "unconfirmed"]
-    if struct_notes:
-        print(f"  struct member offsets: {len(confirmed)}/{len(struct_notes)} "
-              f"confirmed against this binary")
-    if unconfirmed:
-        print(f"  carried forward unverified: {', '.join(unconfirmed)}")
 
     if not args.yes:
         answer = input("\nReplace myseqserver.ini now? [y/N]: ").strip().lower()
@@ -863,6 +1002,25 @@ def main(argv=None):
                                     "offsets that can't be independently confirmed this run")
     r.add_argument("--patch-date")
     r.add_argument("--force", action="store_true")
+    r.add_argument("--best-effort", action="store_true",
+                    help="for struct fields that fail to confirm (no dissent), take the "
+                         "raw plurality vote instead of falling back to --known. Off by "
+                         "default because it is a measured real risk, not a hedge: across "
+                         "the two boundaries in crosscheck_report.json, every wrong vote "
+                         "traced to the weakest (linkseed) anchor tier, and in one real "
+                         "case (SpawnInfo.HideOffset, 08/19->09/11/2026) the plurality was "
+                         "outright wrong -- 2 stale votes outvoted the 1 correct one. Applied "
+                         "fields are labeled BEST-EFFORT in the console output and listed "
+                         "again in a final summary line, never silently merged into the "
+                         "confirmed report; the value still lands in the INI (MySEQ's ini "
+                         "format has no comment convention to flag it there), so read the "
+                         "summary line before trusting one. The disassembly shown for each "
+                         "candidate is there so you can override the vote yourself.")
+    r.add_argument("--review-file",
+                    help="where to write the manual-review Markdown doc for any "
+                         "UNCONFIRMED/BEST-EFFORT struct field (default: next to "
+                         "--out-ini, or ./eqoffsets_review.md if --out-ini wasn't given). "
+                         "Not written at all if every struct field confirmed cleanly.")
     r.set_defaults(func=cmd_resolve)
 
     s = sub.add_parser("selftest", help="resolve against a binary with known offsets and diff")
@@ -885,8 +1043,13 @@ def main(argv=None):
     u = sub.add_parser("update",
                        help="interactively point at eqgame.exe + a MySEQ install and "
                             "write a corrected myseqserver.ini in place")
-    u.add_argument("--exe", help="path to eqgame.exe (skips that prompt)")
-    u.add_argument("--myseq-dir", help="MySEQ install folder (skips that prompt)")
+    u.add_argument("--exe", help="path to eqgame.exe -- overrides any remembered path "
+                                  "for this run AND becomes the new remembered one")
+    u.add_argument("--myseq-dir", help="MySEQ install folder -- same override/remember "
+                                        "behavior as --exe")
+    u.add_argument("--config", default=pathconfig.DEFAULT_PATH,
+                    help=f"where --exe/--myseq-dir are remembered between runs "
+                         f"(default: {pathconfig.DEFAULT_PATH})")
     u.add_argument("--known-dir", default="known")
     u.add_argument("--sigs-dir", default="sigs")
     u.add_argument("--yes", action="store_true", help="skip the replace confirmation prompt")

@@ -23,6 +23,7 @@ to be linearly decodable; it is not a strategy that would work on a real
 binary, which is exactly why `.pdata` is the primary path.
 """
 
+import bisect
 import struct
 
 from capstone import CS_GRP_CALL, CS_GRP_JUMP
@@ -149,13 +150,26 @@ class CodeMap:
         self.functions = function_ranges(image)
         self.from_pdata = bool(self.functions)
         if not self.functions:
-            self.functions = [(s.va, s.va + s.virtual_size) for s in image.exec_sections()]
+            self.functions = sorted(
+                (s.va, s.va + s.virtual_size) for s in image.exec_sections())
         self._sections = {}
         for sec in image.exec_sections():
             self._sections[sec.name] = sec
+        # Parallel sorted list of starts, for function_containing()'s bisect
+        # and for recognising a tail-call jmp's target as a real function.
+        self._starts = [start for start, _end in self.functions]
+        self.function_starts = frozenset(self._starts)
 
     def section_for_va(self, va):
         return self.image.section_for_va(va)
+
+    def function_containing(self, va):
+        """(start, end) of the function `va` falls inside, or None."""
+        i = bisect.bisect_right(self._starts, va) - 1
+        if i < 0:
+            return None
+        start, end = self.functions[i]
+        return (start, end) if start <= va < end else None
 
     def instructions(self, start_va, end_va):
         """Decode one function. Not cached: on a real image the full set is
@@ -170,6 +184,30 @@ class CodeMap:
         if hi <= lo:
             return []
         return list(self.md.disasm(sec.data[lo:hi], start_va))
+
+    def disasm_window(self, va, before=3, after=4):
+        """A few instructions of context around `va`, for a human to read.
+
+        This exists for the case anchoring cannot resolve on its own: when a
+        struct field's signatures disagree, the fastest way to find out which
+        one is telling the truth is to look at the actual code, the same way
+        the manual corrections in known/2026-08-19.json's provenance did by
+        hand. Printing it here means that judgment call can be made by
+        whoever is running the tool, immediately, instead of by waiting for
+        someone else to publish an answer.
+
+        Returns [] if `va` doesn't land inside a function we can decode (no
+        .pdata coverage there) or isn't exactly on an instruction boundary.
+        """
+        rng = self.function_containing(va)
+        if rng is None:
+            return []
+        insns = self.instructions(*rng)
+        idx = next((i for i, insn in enumerate(insns) if insn.address == va), None)
+        if idx is None:
+            return []
+        lo, hi = max(0, idx - before), min(len(insns), idx + after + 1)
+        return insns[lo:hi]
 
     def mem_accesses(self, insn):
         """`[base+disp]` operands of `insn` that could be struct field accesses.

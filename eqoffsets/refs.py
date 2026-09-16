@@ -119,6 +119,21 @@ def find_refs(image, target, md=None, sections=None, max_sites=None):
         for p in _stage_a_candidates(data, sec.va, target):
             p = int(p)
             lo = max(0, p - MAX_INSN_PREFIX)
+            # Scanning s from closest-to-the-disp32 outward means that when a
+            # REX.W-prefixed 7-byte form (`48 8B 05 disp32`) and the same
+            # bytes read one byte later as a REX-less 6-byte form
+            # (`8B 05 disp32`) are BOTH valid decodes -- which happens for
+            # every plain RIP-relative mov/lea, since dropping the prefix
+            # byte shortens insn_len by exactly what it removes from
+            # insn_va, leaving `insn_va + insn_len` unchanged -- this loop
+            # finds the shorter alias first and never tries the longer one.
+            # Both compute the identical target, so this is not a
+            # correctness bug; it just means `site.va` for such an
+            # instruction may be one byte later than a from-the-start linear
+            # disassembly would put its start. Harmless for everything that
+            # only needs the target address, but worth knowing before
+            # treating a RefSite's va as a canonical instruction boundary
+            # for anything else (e.g. cli.py's disassembly diagnostic).
             for s in range(p - 2, lo - 1, -1):
                 chunk = data[s:s + 16]
                 if len(chunk) < 4:
