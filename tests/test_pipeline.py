@@ -20,17 +20,26 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from eqoffsets.pe import Section
 from eqoffsets.refs import find_refs
 from eqoffsets.sigbuild import build_offset_signatures
-from eqoffsets.structsig import build_struct_offset_signatures
+from eqoffsets.structsig import build_struct_offset_signatures, signatures_from_sites
 from eqoffsets.resolve import resolve_offset, resolve_all
 from eqoffsets.scan import compile_pattern, find_all, parse_pattern, format_pattern
 from eqoffsets.buildinfo import extract_build_string
-from eqoffsets.cli import _check_pair, _norm_value, _ini_up_to_date, _latest_pair
+from eqoffsets.codemap import CodeMap, function_ranges
+from eqoffsets.anchor import StructKind, find_anchored_sites
+from eqoffsets.cli import (_check_pair, _norm_value, _ini_up_to_date, _latest_pair,
+                           _parse_disp, _format_disp)
 
 
 class FakeImage:
-    """Duck-typed stand-in for PEImage."""
+    """Duck-typed stand-in for PEImage.
 
-    def __init__(self, text_va, text_bytes, data_va, data_bytes, image_base=0x140000000):
+    `functions` optionally synthesizes a .pdata RUNTIME_FUNCTION table, which
+    is how codemap.py recovers instruction alignment on a real binary. Without
+    it the image exercises the no-.pdata fallback path instead.
+    """
+
+    def __init__(self, text_va, text_bytes, data_va, data_bytes, image_base=0x140000000,
+                 functions=None):
         self.image_base = image_base
         self.size_of_image = 0x2000000
         self.machine = 0x8664
@@ -38,11 +47,25 @@ class FakeImage:
             Section(".text", text_va - image_base, text_va, len(text_bytes), text_bytes, True),
             Section(".data", data_va - image_base, data_va, len(data_bytes), data_bytes, False),
         ]
+        if functions:
+            pdata = b"".join(
+                struct.pack("<III", start - image_base, end - image_base, 0)
+                for start, end in functions
+            )
+            pdata_va = 0x140900000
+            self.sections.append(
+                Section(".pdata", pdata_va - image_base, pdata_va, len(pdata), pdata, False))
 
     is_x64 = True
 
     def exec_sections(self):
         return [s for s in self.sections if s.executable]
+
+    def section_by_name(self, name):
+        for s in self.sections:
+            if s.name == name:
+                return s
+        return None
 
     def section_for_va(self, va):
         for s in self.sections:
@@ -81,6 +104,39 @@ def mov_rax_imm32(v):
 
 def mov_ecx_mem_disp(reg_disp):
     return b"\x8b\x89" + struct.pack("<i", reg_disp)      # mov ecx, [rcx+d]   len 6
+
+
+def mov_rcx_rip(disp):
+    return b"\x48\x8b\x0d" + struct.pack("<i", disp)      # mov rcx, [rip+d]   len 7
+
+
+def mov_rax_rax_disp8(d8):
+    return b"\x48\x8b\x40" + bytes([d8])                  # mov rax, [rax+d8]  len 4
+
+
+def movzx_ecx_rax_disp8(d8):
+    return b"\x0f\xb6\x48" + bytes([d8])                  # movzx ecx,byte[rax+d8] len 4
+
+
+def movzx_eax_rcx_disp32(d):
+    return b"\x0f\xb6\x81" + struct.pack("<i", d)         # movzx eax,byte[rcx+d]  len 7
+
+
+def mov_eax_rbx_disp32(d):
+    return b"\x8b\x83" + struct.pack("<i", d)             # mov eax, [rbx+d]   len 6
+
+
+def call_mem_rax_disp32(d):
+    return b"\xff\x90" + struct.pack("<i", d)             # call qword [rax+d] len 6
+
+
+def call_rel32(from_va, to_va):
+    return b"\xe8" + struct.pack("<i", to_va - (from_va + 5))   # call rel32   len 5
+
+
+def unique_trailer(tag):
+    """Address-free bytes that make a surrounding signature unique."""
+    return mov_rax_imm32(tag) + b"\xc3" + b"\x90" * 3
 
 
 ENCODERS = [mov_rax_rip, lea_rcx_rip, mov_eax_rip]
@@ -317,6 +373,222 @@ def test_struct_offset_rejects_unanchored_decoy():
     assert r.unanimous, f"decoy should have been excluded entirely, got votes {r.votes}"
     print(f"  struct offset anchoring rejects unanchored decoy "
           f"(decoy would vote 0x{old_disp:X}, correctly got 0x{new_disp_true:X}) ok")
+
+
+def test_struct_offset_disp8_field():
+    """disp8-encoded fields (anything under 0x80 -- NextOffset, X/Y/ZOffset,
+    LastnameOffset) used to be out of scope entirely: the old site search
+    scanned for the 4-byte little-endian value, which cannot see a one-byte
+    displacement. Anchoring works off decoded instructions instead, so the
+    encoding width no longer decides whether a field is derivable."""
+    old_d8, new_d8 = 0x48, 0x50
+
+    def make(d8, lead_pad, tag):
+        text = bytearray(b"\x90" * lead_pad)
+        text += mov_rax_rax_disp8(0x10)      # walk PrevOffset -> anchors rax
+        text += movzx_ecx_rax_disp8(d8)      # the field itself, disp8-encoded
+        text += unique_trailer(tag)
+        return FakeImage(0x140001000, bytes(text), 0x140800000, bytes(0x1000))
+
+    old = make(old_d8, lead_pad=0x10, tag=0x4141)
+    new = make(new_d8, lead_pad=0x37, tag=0x4141)
+
+    sigs = build_struct_offset_signatures(
+        old, "LastnameOffset", old_d8, safe_disps={0x10}, trusted_globals=set(),
+        verbose=False)
+    assert sigs, "no signature built for a disp8 field"
+    assert all(s["disp_size"] == 1 for s in sigs), \
+        f"expected disp8 extraction, got {[s['disp_size'] for s in sigs]}"
+
+    r = resolve_all(new, {"offsets": {"LastnameOffset": {"signatures": sigs}}})["LastnameOffset"]
+    assert r.ok and r.value == new_d8, f"got {r.value!r}, want 0x{new_d8:X}: {r.failures}"
+    assert r.consistent, f"signatures disagreed: {r.votes}"
+    print(f"  disp8 struct field derived: 0x{old_d8:X} -> 0x{new_d8:X} ok")
+
+
+def test_pdata_function_ranges():
+    """.pdata is the compiler's own function table; codemap uses it instead of
+    guessing boundaries from 0xCC padding. Without it we fall back to
+    whole-section spans, which is only safe on synthetic images."""
+    text_va = 0x140001000
+    text = bytes(0x100)
+    funcs = [(text_va, text_va + 0x20), (text_va + 0x20, text_va + 0x40)]
+    img = FakeImage(text_va, text, 0x140800000, bytes(0x1000), functions=funcs)
+
+    assert function_ranges(img) == funcs, function_ranges(img)
+    cm = CodeMap(img)
+    assert cm.from_pdata, "should have used .pdata"
+    assert cm.functions == funcs
+
+    # A .pdata record pointing outside any executable section is not a
+    # function we can decode; it must be dropped, not clamped into nonsense.
+    bogus = FakeImage(text_va, text, 0x140800000, bytes(0x1000),
+                      functions=[(text_va, text_va + 0x20), (0x140800000, 0x140800010)])
+    assert function_ranges(bogus) == [(text_va, text_va + 0x20)], function_ranges(bogus)
+
+    no_pdata = FakeImage(text_va, text, 0x140800000, bytes(0x1000))
+    assert function_ranges(no_pdata) == []
+    assert not CodeMap(no_pdata).from_pdata
+    print("  .pdata function ranges parsed, out-of-section records dropped ok")
+
+
+def test_anchor_follows_this_pointer_into_callee():
+    """The fields worth having (OwnerID, Hide, the WorldInfo bytes) are read
+    inside accessor methods, not at the site that loads the global. Trust has
+    to survive a call: a direct call made with a trusted register in rcx means
+    the callee's `this` is that struct."""
+    text_va = 0x140001000
+    global_va = 0x140800100
+    field = 0x300
+
+    caller_off, callee_off = 0x00, 0x20
+    caller_va, callee_va = text_va + caller_off, text_va + callee_off
+
+    text = bytearray(b"\xcc" * 0x40)
+    mov_at = caller_va
+    text[caller_off:caller_off + 7] = mov_rcx_rip(global_va - (mov_at + 7))
+    call_at = caller_va + 7
+    text[caller_off + 7:caller_off + 12] = call_rel32(call_at, callee_va)
+    text[caller_off + 12] = 0xC3
+
+    body = movzx_eax_rcx_disp32(field) + unique_trailer(0x5151)
+    text[callee_off:callee_off + len(body)] = body
+
+    data = bytearray(0x40000)
+    img = FakeImage(text_va, bytes(text), 0x140800000, bytes(data),
+                    functions=[(caller_va, caller_va + 0x20), (callee_va, callee_va + 0x20)])
+
+    kind = StructKind(name="spawn", root_globals={global_va}, link_disps=set(),
+                      field_disps={field})
+    sites = find_anchored_sites(img, [kind], want={"spawn": {field}})
+    anchored = sites.get("spawn", {}).get(field, [])
+    assert anchored, "the callee's field access was never anchored"
+    assert any(s.anchor == "this" for s in anchored), \
+        f"expected a 'this' anchor, got {[s.anchor for s in anchored]}"
+
+    # Same code with the call removed: nothing reaches the callee, so the
+    # access must stay unanchored rather than be trusted on its own.
+    severed = bytearray(text)
+    severed[caller_off + 7:caller_off + 12] = b"\x90" * 5
+    img2 = FakeImage(text_va, bytes(severed), 0x140800000, bytes(data),
+                     functions=[(caller_va, caller_va + 0x20), (callee_va, callee_va + 0x20)])
+    assert not find_anchored_sites(img2, [kind], want={"spawn": {field}}).get("spawn"), \
+        "callee field access was trusted without any caller establishing `this`"
+    print("  anchoring follows `this` through a direct call ok")
+
+
+def test_vtable_call_is_not_a_struct_field():
+    """`call qword ptr [rax+0x90]` indexes a vtable, not a data member. The
+    only GroundItem.YOffset signature to vote wrong across the real
+    07/17->08/19 boundary was built on exactly this instruction shape."""
+    disp = 0x90
+
+    def make(kind_bytes):
+        text = bytearray(b"\x90" * 0x10)
+        text += mov_rax_rax_disp8(0x10)     # anchors rax
+        text += kind_bytes
+        text += unique_trailer(0x6161)
+        return FakeImage(0x140001000, bytes(text), 0x140800000, bytes(0x1000))
+
+    kind = StructKind(name="struct", root_globals=set(), link_disps={0x10},
+                      field_disps={disp})
+
+    vtable = make(call_mem_rax_disp32(disp))
+    assert not find_anchored_sites(vtable, [kind], want={"struct": {disp}}).get("struct"), \
+        "a virtual dispatch was mistaken for a struct field access"
+
+    # The filter must be about the instruction, not the displacement: a plain
+    # load at the same offset off the same register is still a real site.
+    load = make(b"\x8b\x80" + struct.pack("<i", disp))      # mov eax, [rax+disp]
+    assert load and find_anchored_sites(load, [kind], want={"struct": {disp}}).get("struct"), \
+        "a genuine field load at the same offset was filtered out too"
+    print("  vtable call excluded, plain load at same offset kept ok")
+
+
+def test_shape_anchoring_is_off_by_default():
+    """Shape anchoring -- trusting a register because the function uses it
+    with several known field offsets -- measured 82% cross-patch survival
+    against 95-100% for dataflow anchors, and fails by claiming moved fields
+    stayed put. It must stay opt-in."""
+    fields = [0x100, 0x200, 0x300, 0x400]
+    target = 0x500
+
+    text = bytearray(b"\x90" * 0x10)
+    for d in fields:
+        text += mov_eax_rbx_disp32(d)      # rbx is never traced to anything
+    text += mov_eax_rbx_disp32(target)
+    text += unique_trailer(0x7171)
+    img = FakeImage(0x140001000, bytes(text), 0x140800000, bytes(0x1000))
+
+    kind = StructKind(name="spawn", root_globals=set(), link_disps=set(),
+                      field_disps=set(fields) | {target})
+    want = {"spawn": {target}}
+
+    assert not find_anchored_sites(img, [kind], want=want).get("spawn"), \
+        "shape anchoring fired without being asked for"
+    opted_in = find_anchored_sites(img, [kind], want=want, enable_shape=True)
+    assert opted_in.get("spawn", {}).get(target), "enable_shape=True found nothing"
+    assert all(s.anchor == "shape" for s in opted_in["spawn"][target])
+    print("  shape anchoring off by default, available opt-in ok")
+
+
+def test_crosscheck_covers_struct_fields():
+    """crosscheck is the only measurement that says whether any of this
+    survives a patch, so it has to score struct fields too -- not just the
+    RIP-relative globals."""
+    old_global, new_global = 0x140801234, 0x140805AB0
+    old_field, new_field = 0x300, 0x210
+
+    text_va = 0x140001000
+
+    def make(global_va, field, lead_pad):
+        text = bytearray(b"\x90" * lead_pad)
+        # Block 1: a reference to the global with no struct access after it, so
+        # the global's own signature does not span the field being moved.
+        site = text_va + len(text)
+        text += mov_rcx_rip(global_va - (site + 7))
+        text += unique_trailer(0x8181)
+        # Block 2: the same global, then the field read it anchors.
+        site = text_va + len(text)
+        text += mov_rcx_rip(global_va - (site + 7))
+        text += movzx_eax_rcx_disp32(field)
+        text += unique_trailer(0x8282)
+        return FakeImage(text_va, bytes(text), 0x140800000, bytes(0x40000))
+
+    old = make(old_global, old_field, lead_pad=0x10)
+    new = make(new_global, new_field, lead_pad=0x37)
+
+    old_known = {"memory_offsets": {"CharInfo": f"0x{old_global:X}"},
+                 "static_sections": {"SpawnInfo Offsets": {"LevelOffset": f"0x{old_field:x}"}}}
+    new_known = {"memory_offsets": {"CharInfo": f"0x{new_global:X}"},
+                 "static_sections": {"SpawnInfo Offsets": {"LevelOffset": f"0x{new_field:x}"}}}
+
+    result = _check_pair(old, old_known, new, new_known)
+
+    assert "CharInfo" in result and result["CharInfo"]["passed"], result.get("CharInfo")
+    key = "SpawnInfo.LevelOffset"
+    assert key in result, f"struct fields missing from crosscheck: {sorted(result)}"
+    assert result[key]["passed"], result[key]
+    assert result[key]["got"] == new_field
+    assert result[key]["sig_results"], "no per-signature records for the struct field"
+    for sid, sr in result[key]["sig_results"].items():
+        assert sr["anchor"], f"{sid} recorded no anchor kind to calibrate against"
+    print(f"  crosscheck scores struct fields: {key} 0x{old_field:X} -> 0x{new_field:X} ok")
+
+
+def test_struct_offset_radix_round_trip():
+    """[WorldInfo Offsets] is written in decimal and everything else in hex.
+    Reading '10' as hex turns a correct derivation into a reported failure --
+    which is exactly what selftest did before this was threaded through."""
+    assert _parse_disp("10", 10) == 10
+    assert _parse_disp("10", 16) == 16
+    assert _parse_disp("0x10", 10) == 16        # explicit prefix always wins
+    assert _format_disp(12, 10) == "12"
+    assert _format_disp(12, 16) == "0xc"
+    for radix in (10, 16):
+        for value in (0, 8, 12, 0x210, 0x10f8):
+            assert _parse_disp(_format_disp(value, radix), radix) == value
+    print("  struct offset radix round trip ok")
 
 
 def test_build_string_extraction():

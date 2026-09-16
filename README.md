@@ -32,7 +32,7 @@ not move at all, and struct layouts change independently of everything else.
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-python3 tests/test_pipeline.py     # must print 6/6 passed
+python3 tests/test_pipeline.py     # must print 21/21 passed
 ```
 
 ## Files
@@ -43,7 +43,9 @@ python3 tests/test_pipeline.py     # must print 6/6 passed
 | `eqoffsets/scan.py` | wildcard byte-pattern matcher |
 | `eqoffsets/refs.py` | finds instructions referencing a known global |
 | `eqoffsets/sigbuild.py` | turns those into unique wildcarded signatures |
-| `eqoffsets/structsig.py` | same idea, but for struct member offsets (`[SpawnInfo Offsets]` etc.) -- anchored, see "Known limits" |
+| `eqoffsets/codemap.py` | function boundaries from `.pdata`, correctly-aligned disassembly |
+| `eqoffsets/anchor.py` | decides which `[reg+disp]` sites are really *this* struct |
+| `eqoffsets/structsig.py` | turns anchored sites into signatures for struct member offsets |
 | `eqoffsets/resolve.py` | matches signatures on a new binary, votes |
 | `eqoffsets/validate.py` | sanity checks before anything is emitted |
 | `eqoffsets/emit_ini.py` | writes `myseqserver.ini` |
@@ -110,8 +112,9 @@ python3 -m eqoffsets.cli selftest \
   --known  known/2025-10-15.json
 ```
 
-All six must pass. This only proves the extraction math is right — not that the
-signatures survive a patch. That is step 4, and it is the important one.
+All 37 must pass -- six memory offsets and 31 struct fields. This only proves
+the extraction math is right, not that the signatures survive a patch. That is
+step 4, and it is the important one.
 
 ### 4. Prove it across a patch — do this before you need it
 
@@ -127,7 +130,7 @@ python3 -m eqoffsets.cli selftest \
 
 This is the only measurement that tells you whether the tool works. Do it for
 every pair of consecutive patches you can collect. A signature set that scores
-6/6 across three or four historical patch boundaries is one you can rely on;
+37/37 across three or four historical patch boundaries is one you can rely on;
 one you have never tested across a boundary is a guess with extra steps.
 
 **Start collecting old `eqgame.exe` files and their published offset lists now.**
@@ -177,40 +180,80 @@ one just falls back to the known-offsets value instead.
 
 ---
 
+## How the struct offsets are derived
+
+`[SpawnInfo Offsets]`, `[GroundItem Offsets]` and `[WorldInfo Offsets]` are
+ModRM displacements (`mov eax, [rcx+0x564]`), not globals. A bare search for
+"every instruction touching `0x564`" turns up dozens of unrelated struct
+fields that happen to share the number, and picking the wrong one is how this
+project once published a `HideOffset` that was really a stack slot in an
+unrelated function.
+
+So the search never starts from the displacement. It starts from a global
+that is already resolved and follows it forward through the code
+(`eqoffsets/anchor.py`); a site counts only if its base register traces back
+to one. Trust is established five ways, strongest first:
+
+| anchor | meaning |
+|---|---|
+| `root` | the register came straight out of a resolved global (`mov rcx,[rip+CharInfo]`, or `lea` when the global *is* the struct) |
+| `link` | walked to another instance through `NextOffset`/`PrevOffset` from an already-trusted register |
+| `this` | a direct `call` made with a trusted register in `rcx`, propagated to a fixpoint -- this is what reaches the accessor methods where the interesting fields actually live |
+| `linkseed` | a bare `mov rdx,[rax+PrevOffset]` with nothing behind it; weakest, and the only rule the old implementation had |
+| `shape` | **off by default** -- a register used with several known field offsets. Measured at 82% cross-patch survival against 95-100% for the rest, and it fails specifically by insisting a moved field stayed put. `--struct-shape-anchor` opts in. |
+
+Instruction alignment comes from the PE's own `.pdata` exception-unwind
+table, which is an exact, compiler-authored map of ~26k function boundaries
+covering 94% of `.text` -- not a guess based on `0xCC` padding.
+
+`build` derives all of this automatically (`--no-structs` skips it).
+`resolve` overlays a field only when its signatures agree with **no dissent**
+(`Resolution.consistent` -- a signature that fails to fire across a patch is
+not the same as one that actively disagrees, and only the latter is treated
+as untrustworthy). Anything unconfirmed is carried forward from `--known`,
+printed as `UNCONFIRMED` with the full vote breakdown, and never silently
+trusted. `selftest` and `crosscheck` score these against ground truth exactly
+the way they score the globals.
+
+### Measured result
+
+Signatures built from the 07/17/2026 binary, resolved against 08/19/2026 and
+compared to the published list for that build:
+
+```
+37 passed, 0 failed     (6 memory offsets + 31 struct fields)
+```
+
+That includes the six fields the 08/19 patch actually moved --
+`LevelOffset` `0x564`→`0x210`, `HideOffset` `0x4d0`→`0x304`,
+`OwnerIDOffset` `0x554`→`0x4b4`, `ClassOffset`, `RaceOffset`,
+`PrimaryOffset`, `OffhandOffset` -- all derived rather than carried forward.
+One field (`GroundItem.IdOffset`) drew a split vote and was correctly
+reported `UNCONFIRMED` rather than claimed. Run `crosscheck` to reproduce it;
+it writes `crosscheck_report.json` with per-signature and per-anchor-kind
+survival rates.
+
 ## Known limits
 
-**Struct offsets are derived where they can be anchored; carried forward
-verbatim otherwise.** `[SpawnInfo Offsets]` and `[GroundItem Offsets]` are
-ModRM displacements (`mov eax, [rcx+0x564]`), not globals, and a bare search
-for "every instruction touching disp32==0x564" turns up dozens of unrelated
-struct fields elsewhere in the binary that just happen to share the same
-numeric offset. `eqoffsets/structsig.py` handles this by only trusting a
-candidate site if it is *anchored* -- its base register is provably derived
-from a known-safe dereference (`NextOffset`/`PrevOffset`, the linked-list
-pointers) or sits near a reference to an already-resolved global. Unanchored
-sites never get a signature built for them at all. `build` derives these
-automatically; `resolve` overlays a field's known-offsets value only when its
-anchored signatures agree with no dissent (`Resolution.consistent` in
-`resolve.py` -- a signature that simply fails to fire across a patch is not
-the same thing as one that actively disagrees, and only the latter is treated
-as untrustworthy); anything unconfirmed is carried forward from `--known` and
-printed clearly as such, never silently trusted. `selftest` checks these
-against ground truth the same way it checks the globals.
+- **A field that crosses the disp8/disp32 boundary** (under `0x80` to over,
+  or back) changes the *length* of every instruction that touches it, so its
+  signatures stop matching entirely and it is reported unresolved. That is the
+  intended outcome -- the fingerprint has genuinely lost the field -- but it
+  means a field sitting near `0x80` is the most likely one to need a manual
+  re-derivation after a big struct reorg.
+- **A field at offset 0** (`GroundItem.PrevOffset`) is encoded with no
+  displacement bytes at all in the common case, so there is nothing to read
+  back. It resolves only from sites where the compiler happened to emit an
+  explicit `disp8` of zero.
+- **Calibration rests on one patch boundary**, the only pair this repo has
+  both binaries for. It is enough to rank the anchor kinds -- the gap between
+  52% and 100% is not noise -- but not to fine-tune scoring weights. Collect
+  more pairs; `crosscheck` is built to consume them.
 
-Two things this does **not** cover, so treat them as still-manual:
-
-- **disp8-encoded offsets** (roughly anything under `0x80` -- `NextOffset`,
-  `PrevOffset`, `LastnameOffset`, `X/Y/ZOffset`, `GroundItem`'s
-  `Id/DropIdOffset`) are packed into a single byte by the compiler and are not
-  searched -- a byte-wide value search is both slow and far too noisy to
-  anchor reliably across an 8&nbsp;MB `.text` section.
-- **`[WorldInfo Offsets]`** are bit positions in a packed bitfield, not struct
-  byte displacements, so this technique does not apply to them at all.
-
-`build`'s output tells you exactly which fields it could and couldn't derive
-for a given binary; `resolve`'s `UNCONFIRMED` lines tell you which fields it
-carried forward without independent confirmation. Read those before trusting
-an INI blindly, the same as you would for `SPLIT` on the memory offsets.
+`build` prints exactly which fields it could and couldn't anchor; `resolve`'s
+`UNCONFIRMED` lines tell you which it carried forward without independent
+confirmation. Read those before trusting an INI blindly, the same as you
+would for `SPLIT` on the memory offsets.
 
 **The PE loader is the least-tested seam.** The test suite drives the whole
 pipeline through a synthetic in-memory image, which exercises the scanning,

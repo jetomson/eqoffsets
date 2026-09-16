@@ -3,16 +3,22 @@
 The caller (cli.py) assembles `static_sections` before this module ever sees
 it: struct member offsets that structsig.py could anchor and confirm are
 already overlaid on top of the --known values by the time this function
-runs, and [WorldInfo Offsets] (bit positions in a packed bitfield, not struct
-displacements -- see README "Known limits") is always copied through as-is.
-This module just formats whatever dict it's handed; it has no opinion about
-where the values came from.
+runs, and anything that could not be confirmed is carried forward from the
+known-offsets file. Values arrive pre-formatted in whichever radix their
+section uses -- hex for the struct sections, plain decimal for [WorldInfo
+Offsets] -- so this module just formats whatever dict it is handed and has no
+opinion about where the values came from.
 """
 
 import datetime
 
 MEMORY_ORDER = ["ZoneAddr", "SpawnHeaderAddr", "CharInfo",
                 "TargetAddr", "ItemsAddr", "WorldAddr"]
+
+# Published MySEQ lists put the sections in this order. Nothing parses them
+# positionally, but keeping a generated file diffable against a published one
+# is worth one list.
+SECTION_ORDER = ["WorldInfo Offsets", "SpawnInfo Offsets", "GroundItem Offsets"]
 
 
 def build_ini_text(memory_offsets, static_sections, patch_date=None, port=5555,
@@ -39,9 +45,11 @@ def build_ini_text(memory_offsets, static_sections, patch_date=None, port=5555,
         lines.append(f"{key}=0x{memory_offsets[key]:X}")
     lines.append("")
 
-    for section, values in static_sections.items():
+    ordered_sections = [s for s in SECTION_ORDER if s in static_sections]
+    ordered_sections += [s for s in static_sections if s not in SECTION_ORDER]
+    for section in ordered_sections:
         lines.append(f"[{section}]")
-        for k, v in values.items():
+        for k, v in static_sections[section].items():
             lines.append(f"{k}={v}")
         lines.append("")
 

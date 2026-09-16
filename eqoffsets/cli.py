@@ -7,23 +7,64 @@ import os
 import sys
 
 from .pe import PEImage
+from .codemap import CodeMap
+from .anchor import StructKind, find_anchored_sites
 from .sigbuild import build_offset_signatures
-from .structsig import build_struct_offset_signatures
+from .structsig import signatures_from_sites
 from .resolve import resolve_all
 from .validate import validate_all, validate_struct_offset, print_report
 from .emit_ini import write_ini
 from .buildinfo import client_hash as extract_client_hash, extract_build_string
 
-# Struct sections eligible for anchored insn_disp derivation (structsig.py).
-# WorldInfo Offsets is deliberately excluded: those are bit positions in a
-# packed bitfield, not ModRM struct-member displacements, so this whole
-# approach does not apply to them.
-STRUCT_SECTIONS = ("SpawnInfo Offsets", "GroundItem Offsets")
-# These fields are used AS anchors (structsig's safe_disps) for deriving
-# everything else in their section, so deriving them from themselves would
-# be circular -- and they're small enough to be disp8-encoded anyway, which
-# this scan doesn't cover. Carried forward verbatim.
-ANCHOR_FIELDS = ("NextOffset", "PrevOffset")
+# How each INI section's struct is reached from an already-resolved global,
+# and how its values are written.
+#
+#   roots  -- memory_offsets entries that point at (or are) an instance. All
+#             of them are tried; ones that turn out not to reach the struct
+#             in a given build simply contribute no sites.
+#   links  -- fields holding a pointer to another instance of the same
+#             struct, so anchoring can walk the list. Empty for WorldInfo,
+#             which is a single block rather than a list.
+#   radix  -- how published MySEQ lists write this section. [WorldInfo
+#             Offsets] is plain decimal; everything else is 0x-hex. Getting
+#             this wrong silently reads "10" as 16.
+STRUCT_SECTIONS = {
+    "SpawnInfo Offsets": {
+        "roots": ("SpawnHeaderAddr", "CharInfo", "TargetAddr"),
+        "links": ("NextOffset", "PrevOffset"),
+        "radix": 16,
+    },
+    "GroundItem Offsets": {
+        "roots": ("ItemsAddr",),
+        "links": ("NextOffset", "PrevOffset"),
+        "radix": 16,
+    },
+    # Historically excluded on the theory that these were bit positions in a
+    # packed bitfield. They are not -- they are plain byte displacements into
+    # the world-info block, and once anchoring could follow WorldAddr through
+    # a call into its accessors, all five turned out to be derivable like
+    # anything else.
+    "WorldInfo Offsets": {
+        "roots": ("WorldAddr",),
+        "links": (),
+        "radix": 10,
+    },
+}
+
+
+def _parse_disp(value, radix):
+    """Read a struct-offset value written in this section's radix."""
+    if not isinstance(value, str):
+        return int(value)
+    text = value.strip()
+    if text.lower().startswith("0x"):
+        return int(text, 16)
+    return int(text, radix)
+
+
+def _format_disp(value, radix):
+    """Write a derived value back the way the section is normally written."""
+    return f"0x{value:x}" if radix == 16 else str(value)
 
 
 def _struct_key(section, field):
@@ -52,25 +93,43 @@ def parse_addr(v):
     return int(v, 16) if isinstance(v, str) else int(v)
 
 
-def _struct_anchors(known):
-    """(safe_disps, trusted_globals) available to anchor struct-offset derivation."""
+def _struct_plan(known):
+    """Build the anchoring plan for this known-offsets file.
+
+    Returns (kinds, want, fields) where `kinds` are StructKind specs for
+    anchor.py, `want` restricts recorded displacements to the ones we are
+    actually after, and `fields` is the flat [(section, field, old_disp)]
+    worklist.
+    """
     static = known.get("static_sections", {})
-    safe_disps = set()
-    for sec_name in STRUCT_SECTIONS:
-        for field in ANCHOR_FIELDS:
-            v = static.get(sec_name, {}).get(field)
-            if v is not None:
-                try:
-                    safe_disps.add(parse_addr(v))
-                except (ValueError, TypeError):
-                    pass
-    trusted_globals = set()
-    for v in known.get("memory_offsets", {}).values():
+    globals_by_name = {}
+    for name, value in known.get("memory_offsets", {}).items():
         try:
-            trusted_globals.add(parse_addr(v))
+            globals_by_name[name] = parse_addr(value)
         except (ValueError, TypeError):
-            pass
-    return safe_disps, trusted_globals
+            continue
+
+    kinds, want, fields = [], {}, []
+    for sec_name, spec in STRUCT_SECTIONS.items():
+        radix = spec["radix"]
+        disps = {}
+        for field, value in static.get(sec_name, {}).items():
+            try:
+                disps[field] = _parse_disp(value, radix)
+            except (ValueError, TypeError):
+                continue
+        if not disps:
+            continue
+        kinds.append(StructKind(
+            name=sec_name,
+            root_globals={globals_by_name[g] for g in spec["roots"] if g in globals_by_name},
+            link_disps={disps[f] for f in spec["links"] if f in disps},
+            field_disps=set(disps.values()),
+        ))
+        want[sec_name] = set(disps.values())
+        for field, disp in disps.items():
+            fields.append((sec_name, field, disp))
+    return kinds, want, fields
 
 
 def open_image(path):
@@ -115,31 +174,29 @@ def cmd_build(args):
     db["struct_offsets"] = {}
     struct_empty = []
     if not args.no_structs:
-        safe_disps, trusted_globals = _struct_anchors(known)
-        static = known.get("static_sections", {})
+        kinds, want, fields = _struct_plan(known)
         print("\nderiving struct member offsets (anchored, extract=insn_disp)...")
-        for sec_name in STRUCT_SECTIONS:
-            for field, value in static.get(sec_name, {}).items():
-                if field in ANCHOR_FIELDS:
-                    continue
-                try:
-                    old_disp = parse_addr(value)
-                except (ValueError, TypeError):
-                    continue
-                if old_disp == 0:
-                    continue  # disp32==0 matches every bare [reg]; not a usable anchor value
-                sigs = build_struct_offset_signatures(
-                    image, field, old_disp,
-                    safe_disps=safe_disps, trusted_globals=trusted_globals,
-                    keep=args.keep)
-                db["struct_offsets"][_struct_key(sec_name, field)] = {
-                    "section": sec_name,
-                    "field": field,
-                    "known_value": f"0x{old_disp:X}",
-                    "signatures": sigs,
-                }
-                if not sigs:
-                    struct_empty.append(f"{sec_name}.{field}")
+        codemap = CodeMap(image)
+        if not codemap.from_pdata:
+            print("  WARNING: no usable .pdata function table; anchoring will be "
+                  "much weaker on this image")
+        print(f"  tracing {len(kinds)} struct(s) through {len(codemap.functions)} function(s)")
+        anchored = find_anchored_sites(image, kinds, want=want, codemap=codemap,
+                                       verbose=True, enable_shape=args.struct_shape_anchor)
+        for sec_name, field, old_disp in fields:
+            sites = anchored.get(sec_name, {}).get(old_disp, [])
+            sigs = signatures_from_sites(image, field, sites, codemap=codemap,
+                                         keep=args.struct_keep)
+            db["struct_offsets"][_struct_key(sec_name, field)] = {
+                "section": sec_name,
+                "field": field,
+                "radix": STRUCT_SECTIONS[sec_name]["radix"],
+                "known_value": _format_disp(old_disp, STRUCT_SECTIONS[sec_name]["radix"]),
+                "anchored_sites": len(sites),
+                "signatures": sigs,
+            }
+            if not sigs:
+                struct_empty.append(f"{sec_name}.{field}")
 
     with open(args.out, "w") as fh:
         json.dump(db, fh, indent=2)
@@ -189,26 +246,29 @@ def cmd_resolve(args):
         for key, entry in struct_sigs.items():
             sec_name = entry.get("section", "SpawnInfo Offsets")
             field = entry.get("field", key)
+            radix = entry.get("radix", STRUCT_SECTIONS.get(sec_name, {}).get("radix", 16))
             r = struct_resolutions.get(key)
             problems = validate_struct_offset(field, r.value if (r and r.ok) else None)
             known_val = static.get(sec_name, {}).get(field)
+            label = f"{sec_name.split()[0]}.{field}"
 
             if r and r.ok and r.consistent and not problems:
-                new_val = f"0x{r.value:x}"
+                new_val = _format_disp(r.value, radix)
                 tag = ""
-                if known_val is not None and known_val.lower() != new_val.lower():
+                if known_val is not None and str(known_val).lower() != new_val.lower():
                     tag = f"  (known-offsets had {known_val} -- updating)"
-                agree_tag = "unanimous" if r.unanimous else f"{r.agreement}/{r.agreement} fired, no dissent"
-                print(f"  {field}: 0x{r.value:X} [{agree_tag}]{tag}")
+                agree_tag = ("unanimous" if r.unanimous
+                             else f"{r.agreement}/{r.agreement} fired, no dissent")
+                print(f"  {label}: {new_val} [{agree_tag}]{tag}")
                 static.setdefault(sec_name, {})[field] = new_val
             else:
                 fallback = known_val if known_val is not None else "?"
                 why = problems[0] if problems else (r.summary() if r else "no signatures")
-                print(f"  {field}: UNCONFIRMED ({why}) -- keeping known-offsets value {fallback}")
+                print(f"  {label}: UNCONFIRMED ({why}) -- keeping known-offsets value {fallback}")
                 if r:
                     for sid, val in r.votes.items():
                         tag = "" if val == r.value else "  <- disagrees"
-                        print(f"      - {sid}: voted 0x{val:X}{tag}")
+                        print(f"      - {sid}: voted {_format_disp(val, radix)}{tag}")
                     for sid, reason in r.failures.items():
                         print(f"      - {sid}: {reason}")
                 struct_undetermined.append(f"{sec_name}.{field}")
@@ -268,17 +328,23 @@ def cmd_selftest(args):
             want_str = known_static.get(sec_name, {}).get(field)
             if want_str is None:
                 continue
-            want = parse_addr(want_str)
+            # [WorldInfo Offsets] is written in decimal; reading "10" as hex
+            # here would report a correct derivation as a failure.
+            radix = entry.get("radix", STRUCT_SECTIONS.get(sec_name, {}).get("radix", 16))
+            want = _parse_disp(want_str, radix)
+            shown = _format_disp
             r = struct_resolutions.get(key)
+            label = f"{sec_name.split()[0]}.{field}"
             if r is None or not r.ok:
-                print(f"  FAIL {field}: unresolved (expected 0x{want:X})")
+                print(f"  FAIL {label}: unresolved (expected {shown(want, radix)})")
                 failed += 1
             elif r.value == want:
-                tag = "" if r.unanimous else f"  (split vote {r.agreement}/{r.total})"
-                print(f"  ok   {field}: 0x{r.value:X}{tag}")
+                tag = "" if r.consistent else f"  (SPLIT {r.agreement}/{len(r.votes)} voters)"
+                print(f"  ok   {label}: {shown(r.value, radix)}{tag}")
                 passed += 1
             else:
-                print(f"  FAIL {field}: got 0x{r.value:X}, expected 0x{want:X}")
+                print(f"  FAIL {label}: got {shown(r.value, radix)}, "
+                      f"expected {shown(want, radix)}")
                 failed += 1
 
     print(f"\n{passed} passed, {failed} failed")
@@ -288,19 +354,47 @@ def cmd_selftest(args):
 # ---------------------------------------------------------- crosscheck
 
 
-def _check_pair(old_image, old_known_data, new_image, new_known_data, keep=5):
+def _sig_results(signatures, resolution, want):
+    """Per-signature verdict for one offset at one patch boundary."""
+    out = {}
+    for sig in signatures:
+        sid = sig.get("id", "?")
+        if resolution and sid in resolution.votes:
+            out[sid] = {
+                "matched": True,
+                "value": resolution.votes[sid],
+                "correct": resolution.votes[sid] == want,
+                "failure": None,
+                "anchor": sig.get("anchor"),
+            }
+        else:
+            out[sid] = {
+                "matched": False,
+                "value": None,
+                "correct": False,
+                "failure": (resolution.failures.get(sid) if resolution else None) or "unresolved",
+                "anchor": sig.get("anchor"),
+            }
+    return out
+
+
+def _check_pair(old_image, old_known_data, new_image, new_known_data, keep=5,
+                struct_keep=9, structs=True):
     """Build sigs from old_image, resolve against new_image, compare to new_known_data.
 
-    Returns a dict keyed by offset name::
+    Returns a dict keyed by offset name -- memory offsets under their bare
+    name, struct fields as "SpawnInfo.LevelOffset" -- each::
 
         {
           "expected": int,
           "got":      int | None,
           "passed":   bool,
           "unanimous": bool,
+          "consistent": bool,
+          "radix":    16 | 10,
           "sig_results": {
               sig_id: {"matched": bool, "value": int|None,
-                       "correct": bool, "failure": str|None}
+                       "correct": bool, "failure": str|None, "anchor": str|None}
           }
         }
 
@@ -313,36 +407,63 @@ def _check_pair(old_image, old_known_data, new_image, new_known_data, keep=5):
         sigs = build_offset_signatures(old_image, name, target, keep=keep, verbose=False)
         sigs_by_offset[name] = {"known_value": f"0x{target:X}", "signatures": sigs}
 
-    sigdb = {"offsets": sigs_by_offset}
-    resolutions = resolve_all(new_image, sigdb)
+    resolutions = resolve_all(new_image, {"offsets": sigs_by_offset})
     expected = {k: parse_addr(v) for k, v in new_known_data["memory_offsets"].items()}
 
     result = {}
     for name, want in expected.items():
         r = resolutions.get(name)
-        sig_results = {}
-        for sig in sigs_by_offset.get(name, {}).get("signatures", []):
-            sid = sig.get("id", "?")
-            if r and sid in r.votes:
-                sig_results[sid] = {
-                    "matched": True,
-                    "value": r.votes[sid],
-                    "correct": r.votes[sid] == want,
-                    "failure": None,
-                }
-            else:
-                sig_results[sid] = {
-                    "matched": False,
-                    "value": None,
-                    "correct": False,
-                    "failure": (r.failures.get(sid) if r else None) or "unresolved",
-                }
         result[name] = {
             "expected": want,
             "got": r.value if (r and r.ok) else None,
             "passed": r is not None and r.ok and r.value == want,
             "unanimous": r.unanimous if (r and r.ok) else False,
-            "sig_results": sig_results,
+            "consistent": r.consistent if (r and r.ok) else False,
+            "radix": 16,
+            "sig_results": _sig_results(
+                sigs_by_offset.get(name, {}).get("signatures", []), r, want),
+        }
+
+    # Struct member offsets get the same treatment: build anchored signatures
+    # from the older binary, resolve them against the newer one, and score
+    # each signature against the newer binary's published value. This is the
+    # only way to tell an anchoring rule that works from one that merely
+    # sounds convincing -- see anchor.py's calibration note.
+    if not structs or not old_known_data.get("static_sections"):
+        return result
+
+    kinds, want_map, fields = _struct_plan(old_known_data)
+    codemap = CodeMap(old_image)
+    anchored = find_anchored_sites(old_image, kinds, want=want_map, codemap=codemap)
+    new_static = new_known_data.get("static_sections", {})
+
+    struct_sigs = {}
+    for sec_name, field, old_disp in fields:
+        sites = anchored.get(sec_name, {}).get(old_disp, [])
+        sigs = signatures_from_sites(old_image, field, sites, codemap=codemap,
+                                     keep=struct_keep, verbose=False)
+        struct_sigs[_struct_key(sec_name, field)] = {
+            "section": sec_name, "field": field,
+            "radix": STRUCT_SECTIONS[sec_name]["radix"], "signatures": sigs,
+        }
+
+    struct_res = resolve_all(new_image, {"offsets": struct_sigs})
+    for key, entry in struct_sigs.items():
+        sec_name, field = entry["section"], entry["field"]
+        want_str = new_static.get(sec_name, {}).get(field)
+        if want_str is None:
+            continue
+        radix = entry["radix"]
+        want = _parse_disp(want_str, radix)
+        r = struct_res.get(key)
+        result[f"{sec_name.split()[0]}.{field}"] = {
+            "expected": want,
+            "got": r.value if (r and r.ok) else None,
+            "passed": r is not None and r.ok and r.value == want,
+            "unanimous": r.unanimous if (r and r.ok) else False,
+            "consistent": r.consistent if (r and r.ok) else False,
+            "radix": radix,
+            "sig_results": _sig_results(entry["signatures"], r, want),
         }
     return result
 
@@ -390,6 +511,10 @@ def cmd_crosscheck(args):
 
     # survival[offset_name][sig_id] = {"tested": N, "passed": N}
     survival = {}
+    # anchor_survival[anchor_kind] = {"tested": N, "passed": N}. This is the
+    # number that decides which anchoring rules earn their keep; see the
+    # calibration note in anchor.py.
+    anchor_survival = {}
     boundary_records = []
     any_failed = False
 
@@ -401,25 +526,29 @@ def cmd_crosscheck(args):
         new_known = load_json(known_dates[to_date])
 
         print("  building signatures from older binary...")
-        pair = _check_pair(old_image, old_known, new_image, new_known, keep=args.keep)
+        pair = _check_pair(old_image, old_known, new_image, new_known,
+                           keep=args.keep, struct_keep=args.struct_keep,
+                           structs=not args.no_structs)
 
         passed_n = failed_n = 0
         for name, entry in pair.items():
+            radix = entry.get("radix", 16)
             want = entry["expected"]
             got = entry["got"]
             if entry["passed"]:
-                tag = "" if entry["unanimous"] else "  [SPLIT]"
-                print(f"    ok   {name}: 0x{got:X}{tag}")
+                tag = "" if entry["consistent"] else "  [SPLIT]"
+                print(f"    ok   {name}: {_format_disp(got, radix)}{tag}")
                 passed_n += 1
             else:
-                got_str = f"0x{got:X}" if got is not None else "unresolved"
-                print(f"    FAIL {name}: got {got_str}, expected 0x{want:X}")
+                got_str = _format_disp(got, radix) if got is not None else "unresolved"
+                print(f"    FAIL {name}: got {got_str}, expected {_format_disp(want, radix)}")
                 failed_n += 1
                 any_failed = True
             for sid, sr in entry["sig_results"].items():
                 if not sr["correct"]:
                     reason = sr["failure"] or (
-                        f"voted 0x{sr['value']:X}" if sr["value"] is not None else "no match"
+                        f"voted {_format_disp(sr['value'], radix)}"
+                        if sr["value"] is not None else "no match"
                     )
                     print(f"         - {sid}: {reason}")
 
@@ -433,23 +562,33 @@ def cmd_crosscheck(args):
                 rec["tested"] += 1
                 if sr["correct"]:
                     rec["passed"] += 1
+                anchor = sr.get("anchor") or "rip_global"
+                arec = anchor_survival.setdefault(
+                    anchor, {"tested": 0, "matched": 0, "passed": 0})
+                arec["tested"] += 1
+                arec["matched"] += bool(sr["matched"])
+                arec["passed"] += bool(sr["correct"])
 
-        # Serialisable boundary record (ints -> hex strings).
+        # Serialisable boundary record (ints -> strings in the section's radix).
         boundary_records.append({
             "from": from_date,
             "to": to_date,
             "offsets": {
                 name: {
-                    "expected": f"0x{entry['expected']:X}",
-                    "got": f"0x{entry['got']:X}" if entry["got"] is not None else None,
+                    "expected": _format_disp(entry["expected"], entry.get("radix", 16)),
+                    "got": (_format_disp(entry["got"], entry.get("radix", 16))
+                            if entry["got"] is not None else None),
                     "passed": entry["passed"],
                     "unanimous": entry["unanimous"],
+                    "consistent": entry["consistent"],
                     "sig_results": {
                         sid: {
                             "matched": sr["matched"],
-                            "value": f"0x{sr['value']:X}" if sr["value"] is not None else None,
+                            "value": (_format_disp(sr["value"], entry.get("radix", 16))
+                                      if sr["value"] is not None else None),
                             "correct": sr["correct"],
                             "failure": sr["failure"],
+                            "anchor": sr.get("anchor"),
                         }
                         for sid, sr in entry["sig_results"].items()
                     },
@@ -460,13 +599,27 @@ def cmd_crosscheck(args):
 
     # Print survival matrix.
     print("=== survival matrix ===")
-    print(f"  {'offset':<22} {'sig':<22} {'tested':>6} {'passed':>6} {'rate':>6}")
-    print("  " + "-" * 62)
+    print(f"  {'offset':<28} {'sig':<24} {'tested':>6} {'passed':>6} {'rate':>6}")
+    print("  " + "-" * 74)
     for offset_name in sorted(survival):
         for sig_id, stats in sorted(survival[offset_name].items()):
             t, p = stats["tested"], stats["passed"]
             rate = f"{100 * p // t}%" if t else "n/a"
-            print(f"  {offset_name:<22} {sig_id:<22} {t:>6} {p:>6} {rate:>6}")
+            print(f"  {offset_name:<28} {sig_id:<24} {t:>6} {p:>6} {rate:>6}")
+
+    if anchor_survival:
+        # Two separate numbers on purpose. A signature that stopped matching
+        # is attrition -- the code around it changed -- and costs you evidence.
+        # A signature that matched and voted wrong is an anchoring mistake and
+        # costs you a wrong answer. Only the second column condemns a rule.
+        print("\n=== survival by anchor kind ===")
+        print(f"  {'anchor':<12} {'fired':>12} {'right when fired':>18}")
+        for anchor, stats in sorted(anchor_survival.items(),
+                                    key=lambda kv: -kv[1]["tested"]):
+            t, m, p = stats["tested"], stats["matched"], stats["passed"]
+            fired = f"{m}/{t} ({100 * m // t}%)" if t else "n/a"
+            right = f"{p}/{m} ({100 * p // m}%)" if m else "n/a"
+            print(f"  {anchor:<12} {fired:>12} {right:>18}")
 
     report = {
         "meta": {
@@ -481,6 +634,10 @@ def cmd_crosscheck(args):
                 for sid, s in sigs.items()
             }
             for name, sigs in survival.items()
+        },
+        "anchor_survival": {
+            a: {**s, "rate": s["passed"] / s["tested"] if s["tested"] else 0.0}
+            for a, s in anchor_survival.items()
         },
     }
 
@@ -564,10 +721,11 @@ def _resolve_struct_offsets(image, sigdb, static):
     for key, entry in struct_sigs.items():
         sec_name = entry.get("section", "SpawnInfo Offsets")
         field = entry.get("field", key)
+        radix = entry.get("radix", STRUCT_SECTIONS.get(sec_name, {}).get("radix", 16))
         r = struct_resolutions.get(key)
         problems = validate_struct_offset(field, r.value if (r and r.ok) else None)
         if r and r.ok and r.consistent and not problems:
-            static.setdefault(sec_name, {})[field] = f"0x{r.value:x}"
+            static.setdefault(sec_name, {})[field] = _format_disp(r.value, radix)
             notes.append((sec_name, field, "confirmed"))
         else:
             notes.append((sec_name, field, "unconfirmed"))
@@ -650,9 +808,14 @@ def cmd_update(args):
     for n, v in memory.items():
         tag = "" if n in old_memory and _norm_value(old_memory[n]) == v else "  <- changed"
         print(f"  {n} = 0x{v:X}{tag}")
-    unconfirmed = [f"{sec}.{field}" for sec, field, status in struct_notes if status == "unconfirmed"]
+    confirmed = [n for n in struct_notes if n[2] == "confirmed"]
+    unconfirmed = [f"{sec}.{field}" for sec, field, status in struct_notes
+                   if status == "unconfirmed"]
+    if struct_notes:
+        print(f"  struct member offsets: {len(confirmed)}/{len(struct_notes)} "
+              f"confirmed against this binary")
     if unconfirmed:
-        print(f"  struct field(s) carried forward unverified: {', '.join(unconfirmed)}")
+        print(f"  carried forward unverified: {', '.join(unconfirmed)}")
 
     if not args.yes:
         answer = input("\nReplace myseqserver.ini now? [y/N]: ").strip().lower()
@@ -677,8 +840,19 @@ def main(argv=None):
     b.add_argument("--known", required=True)
     b.add_argument("--out", default="sigs.json")
     b.add_argument("--keep", type=int, default=5)
+    b.add_argument("--struct-keep", type=int, default=9,
+                    help="signatures kept per struct field. Higher than --keep on "
+                         "purpose: struct fields have many more anchored sites than "
+                         "a global has reference sites, and a wider vote is what "
+                         "separates a real layout change from one stale fingerprint")
     b.add_argument("--no-structs", action="store_true",
                     help="skip anchored struct-member offset derivation (globals only)")
+    b.add_argument("--struct-shape-anchor", action="store_true",
+                    help="also trust registers a function uses with several known "
+                         "field offsets. Measured at 82%% cross-patch survival against "
+                         "95-100%% for dataflow anchors, and it fails by claiming moved "
+                         "fields stayed put -- only worth it if a field loses its "
+                         "dataflow anchors entirely (see anchor.py)")
     b.set_defaults(func=cmd_build)
 
     r = sub.add_parser("resolve", help="apply signatures to a new binary")
@@ -703,6 +877,9 @@ def main(argv=None):
     cc.add_argument("--known-dir", default="known")
     cc.add_argument("--out", default="crosscheck_report.json")
     cc.add_argument("--keep", type=int, default=5)
+    cc.add_argument("--struct-keep", type=int, default=9)
+    cc.add_argument("--no-structs", action="store_true",
+                    help="only cross-check the RIP-relative globals")
     cc.set_defaults(func=cmd_crosscheck)
 
     u = sub.add_parser("update",
