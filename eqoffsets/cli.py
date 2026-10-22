@@ -879,6 +879,106 @@ def _struct_changes(ini_cp, struct_results):
     return changes
 
 
+_STATUS_LABEL = {
+    "confirmed": "confirmed",
+    "selected": "selected by you",
+    "unconfirmed": "UNVERIFIED, carried forward -- see review doc",
+}
+
+
+def _ask(ask, prompt):
+    """input() that treats a closed stdin as an empty answer, so piping
+    update into something non-interactive falls back to the defaults
+    instead of crashing halfway through."""
+    try:
+        return ask(prompt).strip()
+    except EOFError:
+        return ""
+
+
+def _choose_field_value(res, rep, static, ask=input, say=print):
+    """Let the user pick one UNCONFIRMED field's value from its candidates.
+
+    Shows exactly what the review doc shows -- `rep` is the same
+    build_field_report dict -- but numbered, so the choice is one keystroke
+    instead of an edit to a known-offsets file. Each candidate carries how
+    many of the field's signatures matched at that value in the new binary:
+    that count is the tool's evidence, and a person overriding the tool
+    should see how much of it they are overriding. The current value is
+    always the last option and the default, so Enter changes nothing.
+
+    Returns True if the user picked a value (which is then applied to
+    `static` and marks `res` "selected"), False if they kept the current one.
+    """
+    n_sigs = len(res["signatures"])
+    current = res["value"]
+    say(f"\n{res['label']}  (currently {current}, carried forward -- not confirmed)")
+    if res["width_note"]:
+        say(f"  width check: {res['width_note']}")
+
+    options = []
+    for c in rep["candidates"]:
+        options.append(c)
+        same = ("  (same as the current value)"
+                if _norm_value(c["value_str"]) == _norm_value(current) else "")
+        say(f"  [{len(options)}] {c['value_str']} -- {len(c['sids'])} of {n_sigs} "
+            f"signature(s) matched with this value in the new binary "
+            f"[{c['anchor']} anchor]{same}")
+        if c["old_window"]:
+            say("        old binary, where the signature was built:")
+            for line in c["old_window"]:
+                say(f"          {line}")
+        if c["new_window"]:
+            say("        new binary, where it matched now:")
+            for line in c["new_window"]:
+                say(f"          {line}")
+    if rep["failures"]:
+        say(f"  ({len(rep['failures'])} of {n_sigs} signature(s) found no match at all "
+            f"in the new binary)")
+    keep = len(options) + 1
+    say(f"  [{keep}] keep {current}")
+
+    while True:
+        raw = _ask(ask, f"  use which value for {res['label']}? "
+                        f"[1-{keep}, Enter = keep {current}]: ")
+        if raw == "" or raw == str(keep):
+            return False
+        if not (raw.isdigit() and 1 <= int(raw) < keep):
+            say(f"  enter a number from 1 to {keep}, or just press Enter to keep {current}")
+            continue
+        # A hand-picked value is still an emitted value (CLAUDE.md invariant
+        # 4): a candidate can be nonsense -- a sign-extended disp8 reads back
+        # negative -- and picking it by number must not skip the check.
+        problems = validate_struct_offset(res["field"], options[int(raw) - 1]["value"])
+        if not problems:
+            break
+        say(f"  can't use that one: {problems[0]}")
+
+    chosen = options[int(raw) - 1]["value_str"]
+    static.setdefault(res["sec_name"], {})[res["field"]] = chosen
+    res["value"] = chosen
+    res["status"] = "selected"
+    say(f"  -> {res['label']} = {chosen}")
+    return True
+
+
+def _offer_manual_selection(unconfirmed, reports, static, ask=input, say=print):
+    """Ask once whether to hand-pick UNCONFIRMED fields; no means no change.
+
+    Answering no (or anything but y, or a closed stdin) leaves update
+    behaving exactly as it always has: carried-forward values, labeled
+    UNVERIFIED, with the review doc to settle them later.
+    """
+    answer = _ask(ask, f"\n{len(unconfirmed)} field(s) could not be confirmed automatically. "
+                       f"Choose their values yourself now? [y/N]: ").lower()
+    if answer != "y":
+        return 0
+    picked = 0
+    for res, rep in zip(unconfirmed, reports):
+        picked += _choose_field_value(res, rep, static, ask=ask, say=say)
+    return picked
+
+
 def _update_summary_lines(existing, memory, struct_results):
     """The offset lines update shows before asking to write the ini.
 
@@ -890,16 +990,22 @@ def _update_summary_lines(existing, memory, struct_results):
     addresses are listed plainly and struct fields are summarized, with any
     UNVERIFIED one still listed by name.
     """
-    unverified = "UNVERIFIED, carried forward -- see review doc"
     lines = []
     if existing is None:
         for n, v in memory.items():
             lines.append(f"  {n} = 0x{v:X}")
         flagged = [res for res in struct_results if res["status"] != "confirmed"]
         for res in flagged:
-            lines.append(f"  {res['label']} = {res['value']}  <- {unverified}")
+            lines.append(f"  {res['label']} = {res['value']}  <- {_STATUS_LABEL[res['status']]}")
         if struct_results:
-            note = f", {len(flagged)} unverified (listed above)" if flagged else ""
+            counts = {}
+            for res in flagged:
+                counts[res["status"]] = counts.get(res["status"], 0) + 1
+            note = "".join(f", {counts[st]} {word}" for st, word in
+                           (("selected", "selected by you"), ("unconfirmed", "unverified"))
+                           if st in counts)
+            if flagged:
+                note += " (listed above)"
             lines.append(f"  ({len(struct_results)} struct field(s): "
                          f"{len(struct_results) - len(flagged)} confirmed{note})")
         return lines
@@ -911,8 +1017,8 @@ def _update_summary_lines(existing, memory, struct_results):
     changes = _struct_changes(existing, struct_results)
     for res, old in changes:
         was = f"from {old}" if old is not None else "(missing from current ini)"
-        status = "confirmed" if res["status"] == "confirmed" else unverified
-        lines.append(f"  {res['label']} = {res['value']}  <- changed {was}, {status}")
+        lines.append(f"  {res['label']} = {res['value']}  <- changed {was}, "
+                     f"{_STATUS_LABEL[res['status']]}")
     if struct_results:
         lines.append(f"  ({len(struct_results) - len(changes)} other struct field(s) unchanged)")
     return lines
@@ -1009,6 +1115,8 @@ def cmd_update(args):
         review_path = os.path.join(myseq_dir, "eqoffsets_review.md")
         write_markdown(review_path, reports, meta={"binary": exe_path})
         print(f"see {review_path} for the candidate values and code to check by hand")
+        if not args.yes:
+            _offer_manual_selection(unconfirmed, reports, static)
 
     existing = configparser.ConfigParser()
     have_existing = os.path.isfile(ini_path)

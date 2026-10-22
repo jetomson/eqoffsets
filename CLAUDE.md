@@ -27,7 +27,7 @@ one that fails loudly.
 
 ## Testing
 
-`python3 tests/test_pipeline.py` — must stay at 31/31 (grows as behavior is
+`python3 tests/test_pipeline.py` — must stay at 33/33 (grows as behavior is
 added; do not shrink it). It builds a synthetic image, simulates a patch by
 moving the global and shifting the code, and checks the signatures still
 resolve correctly. Add a case here for every behaviour you add. Do not weaken
@@ -275,6 +275,27 @@ much code (~3,500 anchored sites at `PrevOffset` = `0x0`). That is likely
 `this` propagation from `ItemsAddr` escaping into unrelated classes, and it
 deserves its own investigation before GroundItem results are trusted on a
 patch that actually moves them.
+
+### 3e. Hand-picking UNCONFIRMED values inside `update` (2026-10-21)
+
+Requested directly: when fields are UNCONFIRMED, `update` asks once whether
+to choose them by hand. On yes, `cli._choose_field_value` lists each
+candidate numbered, with how many of the field's signatures matched at that
+value in the new binary, and the old/new code. These rules hold:
+
+- It renders the same `build_field_report` dict as the review doc, so the
+  console choice and the doc cannot disagree.
+- The current value is always the last option and the default (Enter), so
+  no, EOF and Enter all leave behavior exactly as before.
+- A picked value still goes through `validate_struct_offset` (invariant 4).
+  A sign-extended disp8 candidate can be negative.
+- A picked field is status `selected`, labeled "selected by you" in the
+  pre-write summary. It is never merged into "confirmed". The tool did not
+  confirm it, and the summary is the last place a person can see that.
+- `--yes` skips it, since `--yes` means non-interactive.
+
+On the 10/19 patch-day run, picking `[1]` for `LevelOffset` made the written
+INI match the published list on all 40 values.
 
 ---
 

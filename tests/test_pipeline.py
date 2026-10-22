@@ -30,7 +30,7 @@ from eqoffsets.anchor import StructKind, find_anchored_sites
 from eqoffsets.cli import (_check_pair, _norm_value, _ini_up_to_date, _latest_pair,
                            _parse_disp, _format_disp, _evaluate_struct_fields,
                            _remembered_path, _field_review_report, _struct_changes,
-                           _update_summary_lines)
+                           _update_summary_lines, _offer_manual_selection)
 from eqoffsets import config as pathconfig
 from eqoffsets.review import gather_candidates, build_field_report, build_markdown
 
@@ -1066,6 +1066,87 @@ def test_update_summary_lists_struct_changes():
     assert lines[-1] == "  (5 struct field(s): 4 confirmed, 1 unverified (listed above))", lines
     print("  update summary lists changed struct fields, labels unverified, "
           "first-run summary ok")
+
+
+def _level_field():
+    """An UNCONFIRMED LevelOffset shaped like the real 10/19/2026 one: 4 of
+    9 signatures at 0x52c, 1 at 0x268, 4 no match, 0x270 carried forward."""
+    res = {"sec_name": "SpawnInfo Offsets", "field": "LevelOffset",
+           "label": "SpawnInfo.LevelOffset", "value": "0x270", "status": "unconfirmed",
+           "signatures": [{"id": f"LevelOffset#{i}"} for i in range(9)],
+           "width_note": "advisory only: ... all agree on 0x52c"}
+    rep = {"candidates": [
+               {"value": 0x52C, "value_str": "0x52c", "anchor": "root",
+                "sids": ["LevelOffset#2", "LevelOffset#3", "LevelOffset#4", "LevelOffset#5"],
+                "old_window": ["-> 0x140299B00: mov byte ptr [rcx + 0x270], al"],
+                "new_window": ["-> 0x14029A910: mov byte ptr [rcx + 0x52c], al"]},
+               {"value": 0x268, "value_str": "0x268", "anchor": "this",
+                "sids": ["LevelOffset#6"], "old_window": None,
+                "new_window": ["-> 0x1405FAEA5: lea rcx, [rdi + 0x268]"]},
+               {"value": -0x70, "value_str": "-0x70", "anchor": "this",
+                "sids": ["LevelOffset#7"], "old_window": None, "new_window": None}],
+           "failures": {f"LevelOffset#{i}": "no match" for i in (0, 1, 8)}}
+    static = {"SpawnInfo Offsets": {"LevelOffset": "0x270"}}
+    return res, rep, static
+
+
+def _scripted(answers):
+    it = iter(answers)
+
+    def ask(_prompt):
+        try:
+            return next(it)
+        except StopIteration:
+            raise EOFError
+    return ask
+
+
+def test_manual_selection_applies_chosen_candidate():
+    """update's hand-pick flow: after a yes, every candidate is listed with
+    how many signatures matched it in the new binary and its old/new code;
+    a bad entry re-prompts; the chosen number's value is what gets written,
+    and the field is labeled as the user's choice, not as confirmed."""
+    res, rep, static = _level_field()
+    out = []
+    picked = _offer_manual_selection([res], [rep], static,
+                                     ask=_scripted(["y", "abc", "9", "1"]), say=out.append)
+    text = "\n".join(out)
+    assert picked == 1
+    assert static["SpawnInfo Offsets"]["LevelOffset"] == "0x52c"
+    assert res["status"] == "selected" and res["value"] == "0x52c"
+    assert "[1] 0x52c -- 4 of 9 signature(s) matched" in text, text
+    assert "[2] 0x268 -- 1 of 9 signature(s) matched" in text, text
+    assert "mov byte ptr [rcx + 0x270], al" in text and "mov byte ptr [rcx + 0x52c], al" in text
+    assert "3 of 9 signature(s) found no match" in text, text
+    assert "[4] keep 0x270" in text, text
+    assert text.count("enter a number from 1 to 4") == 2, "bad input must re-prompt"
+
+    lines = _update_summary_lines(None, {}, [res])
+    assert "SpawnInfo.LevelOffset = 0x52c  <- selected by you" in lines[0], lines
+    assert lines[-1] == "  (1 struct field(s): 0 confirmed, 1 selected by you (listed above))"
+    ini = configparser.ConfigParser()
+    ini.read_string("[SpawnInfo Offsets]\nLevelOffset=0x210\n")
+    assert any("<- changed from 0x210, selected by you" in l
+               for l in _update_summary_lines(ini, {}, [res]))
+    print("  manual selection applies the chosen candidate, shows match counts ok")
+
+
+def test_manual_selection_declined_or_kept_changes_nothing():
+    """No, a closed stdin, Enter, and the explicit keep option must all leave
+    the carried-forward value and its UNVERIFIED status exactly as before.
+    An out-of-range value is refused by validate_struct_offset even when
+    picked by number."""
+    for answers in (["n"], [], ["y", ""], ["y", "4"], ["y", "3", ""]):
+        res, rep, static = _level_field()
+        out = []
+        picked = _offer_manual_selection([res], [rep], static,
+                                         ask=_scripted(answers), say=out.append)
+        assert picked == 0, answers
+        assert static["SpawnInfo Offsets"]["LevelOffset"] == "0x270", answers
+        assert res["status"] == "unconfirmed" and res["value"] == "0x270", answers
+        if answers == ["y", "3", ""]:
+            assert any("can't use that one" in l for l in out), out
+    print("  manual selection: no / EOF / Enter / keep / invalid value change nothing ok")
 
 
 if __name__ == "__main__":

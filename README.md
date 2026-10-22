@@ -97,7 +97,30 @@ way its code normally does (a byte counter read as a byte, not an `lea`
 taking its address). On 10/19/2026 that line named the correct
 `LevelOffset` (`0x52c`) while the field itself stayed UNCONFIRMED.
 
-Once you've picked the right value:
+**Picking a value inside `update`.** When a field is UNCONFIRMED, `update`
+asks `Choose their values yourself now? [y/N]` before it writes anything.
+Say `y` and each field is listed with its candidates numbered, each one
+showing how many signatures matched with that value in the new binary and
+the old/new code side by side; the last number keeps the current value, and
+so does just pressing Enter:
+
+```
+  [1] 0x52c -- 4 of 9 signature(s) matched with this value in the new binary [root anchor]
+        old binary, where the signature was built:
+          -> 0x140299B00: mov byte ptr [rcx + 0x270], al
+        new binary, where it matched now:
+          -> 0x14029A910: mov byte ptr [rcx + 0x52c], al
+  [2] 0x268 -- 1 of 9 signature(s) matched with this value in the new binary [this anchor]
+  [3] keep 0x270
+  use which value for SpawnInfo.LevelOffset? [1-3, Enter = keep 0x270]: 1
+```
+
+The number you enter is the value written to `myseqserver.ini`, and the
+summary before the write labels it `selected by you` rather than
+`confirmed`. Say `n` (the default) and `update` behaves exactly as
+before. `--yes` skips this question along with the replace prompt.
+
+To make a choice stick for future runs instead:
 
 1. Edit your known-offsets file (`known/<date>.json`) and set that field.
 2. Re-run `update` (or `resolve`, if you're doing this the manual way) --
