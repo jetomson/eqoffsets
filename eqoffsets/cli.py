@@ -309,6 +309,20 @@ def _evaluate_struct_fields(image, sigdb, static, best_effort=False):
     return results
 
 
+def _field_review_report(res, codemap, old_codemap):
+    """review.build_field_report for one _evaluate_struct_fields result.
+
+    The one place resolve and update turn a result into a review report.
+    Each used to make this call itself, and the copies drifted: the
+    width-check advisory reached resolve's review doc but not update's --
+    the doc most people actually open.
+    """
+    return build_field_report(res["label"], res["r"], res["radix"], res["signatures"],
+                              _format_disp, codemap, old_codemap, res["known_val"],
+                              res["status"], res["why"], applied_val=res["value"],
+                              width_note=res["width_note"])
+
+
 def _print_candidates(rep):
     """Console rendering of one review.build_field_report() dict -- kept in
     lockstep with the Markdown version because both read the same data.
@@ -380,10 +394,7 @@ def cmd_resolve(args):
                               f"  <- discounted, {width_label(w)} access")
                 continue
 
-            rep = build_field_report(label, r, radix, res["signatures"], _format_disp,
-                                     codemap, old_codemap, res["known_val"],
-                                     res["status"], why, applied_val=res["value"],
-                                     width_note=res["width_note"])
+            rep = _field_review_report(res, codemap, old_codemap)
             review_reports.append(rep)
             if res["status"] == "best_effort":
                 print(f"  {label}: {res['value']} [BEST-EFFORT, {why}]")
@@ -848,6 +859,26 @@ def _ini_up_to_date(ini_cp, memory, static):
     return True
 
 
+def _struct_changes(ini_cp, struct_results):
+    """[(result, old_value_or_None)] for struct fields the new ini will change.
+
+    update's replace prompt is the last moment a person can catch a bad
+    value, so it has to show the struct fields too, not just the memory
+    addresses -- on 10/19/2026 OwnerIDOffset and HideOffset both moved, and
+    the old summary listed neither. Unconfirmed fields are included: a
+    carried-forward value can still differ from what the ini has (it comes
+    from the bundled known-offsets file, not from the user's old ini), and
+    that change deserves the loudest label, not silence.
+    """
+    changes = []
+    for res in struct_results:
+        sec = res["sec_name"]
+        cur = ini_cp[sec].get(res["field"]) if ini_cp.has_section(sec) else None
+        if cur is None or _norm_value(cur) != _norm_value(res["value"]):
+            changes.append((res, cur))
+    return changes
+
+
 def _remembered_path(cli_value, remembered_value, check, what):
     """cli_value wins if given (and becomes the new remembered value); else
     fall back to a remembered path from config.py, but only if it still
@@ -930,14 +961,12 @@ def cmd_update(args):
     if unconfirmed:
         labels = [res["label"] for res in unconfirmed]
         print(f"carried forward unverified: {', '.join(labels)}")
+        for res in unconfirmed:
+            if res["width_note"]:
+                print(f"  {res['label']}: {res['width_note']}")
         codemap = CodeMap(image)
         old_codemap = _load_source_codemap(sigdb)
-        reports = [
-            build_field_report(res["label"], res["r"], res["radix"], res["signatures"],
-                               _format_disp, codemap, old_codemap, res["known_val"],
-                               "unconfirmed", res["why"])
-            for res in unconfirmed
-        ]
+        reports = [_field_review_report(res, codemap, old_codemap) for res in unconfirmed]
         review_path = os.path.join(myseq_dir, "eqoffsets_review.md")
         write_markdown(review_path, reports, meta={"binary": exe_path})
         print(f"see {review_path} for the candidate values and code to check by hand\n")
@@ -978,6 +1007,14 @@ def cmd_update(args):
     for n, v in memory.items():
         tag = "" if n in old_memory and _norm_value(old_memory[n]) == v else "  <- changed"
         print(f"  {n} = 0x{v:X}{tag}")
+    changes = _struct_changes(existing, struct_results)
+    for res, old in changes:
+        was = f"from {old}" if old is not None else "(new)"
+        status = ("confirmed" if res["status"] == "confirmed"
+                  else "UNVERIFIED, carried forward -- see review doc")
+        print(f"  {res['label']} = {res['value']}  <- changed {was}, {status}")
+    if struct_results:
+        print(f"  ({len(struct_results) - len(changes)} other struct field(s) unchanged)")
 
     if not args.yes:
         answer = input("\nReplace myseqserver.ini now? [y/N]: ").strip().lower()

@@ -27,7 +27,7 @@ one that fails loudly.
 
 ## Testing
 
-`python3 tests/test_pipeline.py` — must stay at 30/30 (grows as behavior is
+`python3 tests/test_pipeline.py` — must stay at 31/31 (grows as behavior is
 added; do not shrink it). It builds a synthetic image, simulates a patch by
 moving the global and shifting the code, and checks the signatures still
 resolve correctly. Add a case here for every behaviour you add. Do not weaken

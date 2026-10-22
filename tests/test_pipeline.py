@@ -29,7 +29,7 @@ from eqoffsets.codemap import CodeMap, function_ranges
 from eqoffsets.anchor import StructKind, find_anchored_sites
 from eqoffsets.cli import (_check_pair, _norm_value, _ini_up_to_date, _latest_pair,
                            _parse_disp, _format_disp, _evaluate_struct_fields,
-                           _remembered_path)
+                           _remembered_path, _field_review_report, _struct_changes)
 from eqoffsets import config as pathconfig
 from eqoffsets.review import gather_candidates, build_field_report, build_markdown
 
@@ -989,6 +989,14 @@ def test_width_rule_below_dominance_is_advisory_only():
                              "0x304", "unconfirmed", r.summary(), width_note=note)
     md = build_markdown([rep])
     assert "- width check: advisory only" in md, md
+
+    # Both resolve and update build review reports through
+    # _field_review_report; update's used to drop the advisory entirely.
+    res = {"label": "SpawnInfo.HideOffset", "r": r, "radix": 16, "signatures": sigs,
+           "known_val": "0x304", "status": "unconfirmed", "why": r.summary(),
+           "value": "0x304", "width_note": note}
+    assert "- width check: advisory only" in build_markdown(
+        [_field_review_report(res, None, None)])
     print("  below 2/3 dominance: advisory recorded, decision unchanged ok")
 
 
@@ -1016,6 +1024,34 @@ def test_width_rule_guard_rails():
     apply_width_rule(r, sigs, mix)
     assert not r.consistent and not r.discounted
     print("  width rule guard rails (on-width split, agreeing off-width, no width) ok")
+
+
+def test_update_summary_lists_struct_changes():
+    """update's replace prompt must show struct fields that change, not only
+    memory addresses, and must label a carried-forward value as unverified.
+    Mirrors the real 10/19/2026 run: OwnerIDOffset moved (confirmed),
+    LevelOffset changed only because the bundled known file differed from
+    the user's ini (unconfirmed), and decimal WorldInfo values compare as
+    decimal."""
+    ini = configparser.ConfigParser()
+    ini.optionxform = str
+    ini.read_string("[SpawnInfo Offsets]\nOwnerIDOffset=0x54c\nLevelOffset=0x210\n"
+                    "NameOffset=0xB4\n[WorldInfo Offsets]\nWorldDayOffset=10\n")
+
+    def res(sec, field, value, status):
+        return {"sec_name": sec, "field": field, "value": value, "status": status,
+                "label": f"{sec.split()[0]}.{field}"}
+
+    results = [res("SpawnInfo Offsets", "OwnerIDOffset", "0x334", "confirmed"),
+               res("SpawnInfo Offsets", "LevelOffset", "0x270", "unconfirmed"),
+               res("SpawnInfo Offsets", "NameOffset", "0xb4", "confirmed"),
+               res("WorldInfo Offsets", "WorldDayOffset", "10", "confirmed"),
+               res("SpawnInfo Offsets", "HideOffset", "0x238", "confirmed")]
+    got = {r["field"]: (old, r["status"]) for r, old in _struct_changes(ini, results)}
+    assert got == {"OwnerIDOffset": ("0x54c", "confirmed"),
+                   "LevelOffset": ("0x210", "unconfirmed"),
+                   "HideOffset": (None, "confirmed")}, got
+    print("  update summary lists changed struct fields, labels unverified ok")
 
 
 if __name__ == "__main__":

@@ -131,7 +131,7 @@ def build_markdown(reports, meta=None):
         "The field(s) below could not be confirmed automatically this run: their "
         "anchored signatures either disagreed with each other, or none of them "
         "matched at all. eqoffsets never guesses a value it can't back up -- see "
-        "the README section \"Resolving an UNCONFIRMED field yourself\" for the "
+        "the README section \"If a field says UNCONFIRMED\" for the "
         "full explanation. Everything below is what you need to decide by hand, "
         "without waiting on someone else to publish a corrected list."
     )
