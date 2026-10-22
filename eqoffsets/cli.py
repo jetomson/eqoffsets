@@ -879,6 +879,45 @@ def _struct_changes(ini_cp, struct_results):
     return changes
 
 
+def _update_summary_lines(existing, memory, struct_results):
+    """The offset lines update shows before asking to write the ini.
+
+    `existing` is the current ini (a ConfigParser), or None on a first run.
+    Updating, the lines are a diff: every memory address with the ones that
+    moved flagged, and only the struct fields whose value changes. Creating,
+    there is nothing to diff against -- flagging all 37 values as "changed"
+    buried the one thing a first-time user needs to see -- so memory
+    addresses are listed plainly and struct fields are summarized, with any
+    UNVERIFIED one still listed by name.
+    """
+    unverified = "UNVERIFIED, carried forward -- see review doc"
+    lines = []
+    if existing is None:
+        for n, v in memory.items():
+            lines.append(f"  {n} = 0x{v:X}")
+        flagged = [res for res in struct_results if res["status"] != "confirmed"]
+        for res in flagged:
+            lines.append(f"  {res['label']} = {res['value']}  <- {unverified}")
+        if struct_results:
+            note = f", {len(flagged)} unverified (listed above)" if flagged else ""
+            lines.append(f"  ({len(struct_results)} struct field(s): "
+                         f"{len(struct_results) - len(flagged)} confirmed{note})")
+        return lines
+
+    old_memory = existing["Memory Offsets"] if existing.has_section("Memory Offsets") else {}
+    for n, v in memory.items():
+        tag = "" if n in old_memory and _norm_value(old_memory[n]) == v else "  <- changed"
+        lines.append(f"  {n} = 0x{v:X}{tag}")
+    changes = _struct_changes(existing, struct_results)
+    for res, old in changes:
+        was = f"from {old}" if old is not None else "(missing from current ini)"
+        status = "confirmed" if res["status"] == "confirmed" else unverified
+        lines.append(f"  {res['label']} = {res['value']}  <- changed {was}, {status}")
+    if struct_results:
+        lines.append(f"  ({len(struct_results) - len(changes)} other struct field(s) unchanged)")
+    return lines
+
+
 def _remembered_path(cli_value, remembered_value, check, what):
     """cli_value wins if given (and becomes the new remembered value); else
     fall back to a remembered path from config.py, but only if it still
@@ -969,7 +1008,7 @@ def cmd_update(args):
         reports = [_field_review_report(res, codemap, old_codemap) for res in unconfirmed]
         review_path = os.path.join(myseq_dir, "eqoffsets_review.md")
         write_markdown(review_path, reports, meta={"binary": exe_path})
-        print(f"see {review_path} for the candidate values and code to check by hand\n")
+        print(f"see {review_path} for the candidate values and code to check by hand")
 
     existing = configparser.ConfigParser()
     have_existing = os.path.isfile(ini_path)
@@ -997,27 +1036,19 @@ def cmd_update(args):
     else:
         patch_date = datetime.date.today().strftime("%m/%d/%Y")
 
-    print(f"{'updating' if have_existing else 'creating'} {ini_path}:")
+    print(f"\n{'updating' if have_existing else 'creating'} {ini_path}:")
     print(f"  PatchDate   -> {patch_date}")
     print(f"  ClientHash  -> {bhash}")
     print(f"  BuildString -> {bstring}")
     port_note = "kept from existing config" if have_existing else "default, no existing config found"
     print(f"  port        -> {port}  ({port_note})")
-    old_memory = existing["Memory Offsets"] if (have_existing and existing.has_section("Memory Offsets")) else {}
-    for n, v in memory.items():
-        tag = "" if n in old_memory and _norm_value(old_memory[n]) == v else "  <- changed"
-        print(f"  {n} = 0x{v:X}{tag}")
-    changes = _struct_changes(existing, struct_results)
-    for res, old in changes:
-        was = f"from {old}" if old is not None else "(new)"
-        status = ("confirmed" if res["status"] == "confirmed"
-                  else "UNVERIFIED, carried forward -- see review doc")
-        print(f"  {res['label']} = {res['value']}  <- changed {was}, {status}")
-    if struct_results:
-        print(f"  ({len(struct_results) - len(changes)} other struct field(s) unchanged)")
+    for line in _update_summary_lines(existing if have_existing else None,
+                                      memory, struct_results):
+        print(line)
 
     if not args.yes:
-        answer = input("\nReplace myseqserver.ini now? [y/N]: ").strip().lower()
+        verb = "Replace" if have_existing else "Write"
+        answer = input(f"\n{verb} myseqserver.ini now? [y/N]: ").strip().lower()
         if answer != "y":
             print("not written")
             return 0

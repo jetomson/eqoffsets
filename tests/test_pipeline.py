@@ -29,7 +29,8 @@ from eqoffsets.codemap import CodeMap, function_ranges
 from eqoffsets.anchor import StructKind, find_anchored_sites
 from eqoffsets.cli import (_check_pair, _norm_value, _ini_up_to_date, _latest_pair,
                            _parse_disp, _format_disp, _evaluate_struct_fields,
-                           _remembered_path, _field_review_report, _struct_changes)
+                           _remembered_path, _field_review_report, _struct_changes,
+                           _update_summary_lines)
 from eqoffsets import config as pathconfig
 from eqoffsets.review import gather_candidates, build_field_report, build_markdown
 
@@ -1051,7 +1052,20 @@ def test_update_summary_lists_struct_changes():
     assert got == {"OwnerIDOffset": ("0x54c", "confirmed"),
                    "LevelOffset": ("0x210", "unconfirmed"),
                    "HideOffset": (None, "confirmed")}, got
-    print("  update summary lists changed struct fields, labels unverified ok")
+    lines = _update_summary_lines(ini, {"ZoneAddr": 0x140ECAE64}, results)
+    assert "  ZoneAddr = 0x140ECAE64  <- changed" in lines, lines
+    assert any("HideOffset = 0x238  <- changed (missing from current ini)" in l for l in lines)
+    assert lines[-1] == "  (2 other struct field(s) unchanged)", lines
+
+    # First run, no ini yet: nothing is "changed", struct fields are counted,
+    # and an unverified one is still named.
+    lines = _update_summary_lines(None, {"ZoneAddr": 0x140ECAE64}, results)
+    assert not any("changed" in l for l in lines), lines
+    assert lines[0] == "  ZoneAddr = 0x140ECAE64", lines
+    assert any(l.startswith("  SpawnInfo.LevelOffset = 0x270  <- UNVERIFIED") for l in lines)
+    assert lines[-1] == "  (5 struct field(s): 4 confirmed, 1 unverified (listed above))", lines
+    print("  update summary lists changed struct fields, labels unverified, "
+          "first-run summary ok")
 
 
 if __name__ == "__main__":
