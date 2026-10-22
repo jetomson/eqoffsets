@@ -27,7 +27,7 @@ one that fails loudly.
 
 ## Testing
 
-`python3 tests/test_pipeline.py` — must stay at 26/26 (grows as behavior is
+`python3 tests/test_pipeline.py` — must stay at 30/30 (grows as behavior is
 added; do not shrink it). It builds a synthetic image, simulates a patch by
 moving the global and shifting the code, and checks the signatures still
 resolve correctly. Add a case here for every behaviour you add. Do not weaken
@@ -47,9 +47,9 @@ the newer, and prints a survival-rate matrix: per offset, per signature, and
 only the second condemns a rule. Results persist to
 `crosscheck_report.json`.
 
-Still the highest-value thing to feed: it has exactly **one** boundary
-(07/17 → 08/19/2026) to learn from. Every extra binary+list pair collected
-makes every calibration decision below less of a guess.
+Still the highest-value thing to feed. It now has **three** boundaries
+(07/17 → 08/19 → 09/11 → 10/19/2026). Every extra binary+list pair
+collected makes every calibration decision below less of a guess.
 
 ### 2. Scoring calibration
 `sigbuild.score_signature` still uses hand-picked weights, deliberately.
@@ -176,11 +176,9 @@ won't guess, and the whole point is not waiting on someone else's list, what
    and the honest framing is what makes it trustworthy to reach for when the
    risk is acceptable.
 
-Aggregate anchor-kind survival now spans two boundaries (`crosscheck_report.json`):
-root 99%, this 97%, link/rip_global 100%, linkseed 94% — every wrong vote
-observed so far, across both boundaries, traces to `linkseed`. That is
-exactly why it stays the weakest tier and never gets to be the sole evidence
-against dissenting stronger-tier votes.
+Aggregate anchor-kind survival at the time spanned two boundaries: root 99%,
+this 97%, link/rip_global 100%, linkseed 94%, and every wrong vote traced to
+`linkseed`. **The third boundary broke that claim**: see 3d.
 
 ### 3c. A standing artifact for UNCONFIRMED fields, and remembered `update` paths (2026-09-16)
 
@@ -218,6 +216,65 @@ measured survival numbers demoted below a clear `---` divider as
 "Internals and manual workflow." Do not let that divider erode over
 time — the whole point was that a first-time reader never has to scroll
 past derivation theory to find out what a `SPLIT` result means.
+
+### 3d. Third boundary (10/19/2026), and the access-width check (2026-10-21)
+
+Resolved the 10/19/2026 client cold against the 09/11 signatures, then
+scored it against the published 10/21 list (showeq.net thread 8425):
+**39/40**. The two big shifts (`OwnerIDOffset` `0x54c`→`0x334`, `HideOffset`
+`0x504`→`0x238`) confirmed on their own. The one miss was `LevelOffset`. Its
+plurality, `0x52c` (4 votes), was right, but a single dissenting vote
+(`0x268`, from `lea rcx, [rdi+0x270]`) blocked it, so the stale `0x270` was
+carried forward. Full breakdown in `known/2026-10-19.json`'s `_provenance`.
+
+**Every wrong vote at this boundary was `this`-anchored**, not `linkseed`.
+Aggregate across all three: root 99%, linkseed 96%, **this 95%**,
+link/rip_global 100%. `this` propagation reaches methods of other structs
+that share an offset; that is now the main source of dissent.
+
+**The access-width check (`resolve.apply_width_rule`).** A struct member has
+one declared type, so its real accesses agree on width (1/2/4/8 bytes, or
+`addr` for `lea`; float and int of the same size count as the same, because
+position floats are copied with `mov dword` as often as `movss`). `build`
+records `width` on every struct signature and `width_mix` over the field's
+*whole* anchored pool. A dissenting vote is discounted (still printed,
+labeled, kept in `votes` and in `crosscheck_report.json`, never hidden) only
+when:
+
+- its width differs from the pool's dominant one;
+- the on-width votes are unanimous;
+- that dominant width covers ≥ `WIDTH_DOMINANCE` = 2/3 of the pool.
+
+Below 2/3 it only adds an advisory line (console + review doc). Old sigs
+files without widths leave it inert.
+
+Two measured facts drive the design, and both matter more than the code:
+
+1. **The reference width must come from the pool, not the kept signatures.**
+   On 08/19 `HideOffset` the kept signatures were two 2-byte reads (wrong)
+   and one 4-byte read (right). A majority taken among them picks the wrong
+   width and throws away the only correct vote. The pool (10 × 4-byte,
+   8 × 2-byte) gets it right. Across all three boundaries the pool's dominant
+   width never disagreed with the correct votes.
+2. **The 2/3 threshold is deliberately not tuned.** Simulated over all 93
+   field results: every threshold from 50% to 67% gives zero wrong
+   confirmations. 55% would rescue 4 fields, 60% 3, 67% 2. But the fields
+   deciding between those (`HideOffset` pool at 56%, `LevelOffset` at 60%)
+   are single data points. Picking the cutoff that rescues them is fitting
+   to the cases being measured. At 2/3 the rule confirms only `NameOffset`
+   (91%) and `GroundItem.IdOffset` (76%) on 09/11→10/19, and changes nothing
+   on the older boundaries. Revisit only with more boundaries, same as task 2.
+
+**Open problem: `GroundItem.YOffset`'s evidence is bad.** A Y coordinate is a
+4-byte float, but its anchored pool at `0x90` is mostly 1-byte and 8-byte
+accesses (only 2 of 26 sites are 4-byte, and neither became a signature).
+Several kept signatures load a qword pointer from `+0x90`, null-check it and
+call through it. The value has been "right" because Y never moved, not
+because these sites are Y. Relatedly, `GroundItem` anchoring reaches far too
+much code (~3,500 anchored sites at `PrevOffset` = `0x0`). That is likely
+`this` propagation from `ItemsAddr` escaping into unrelated classes, and it
+deserves its own investigation before GroundItem results are trusted on a
+patch that actually moves them.
 
 ---
 

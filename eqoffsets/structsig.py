@@ -104,6 +104,7 @@ def build_signature_for_site(image, md, sec, site, text_sections):
             "site_va": f"0x{site.va:X}",
             "insn": site.text,
             "anchor": site.anchor,
+            "width": site.width,
             "length": len(pat),
             "wildcards": mask.count("?"),
             "anchor_len": compiled.anchor_len,
@@ -173,6 +174,24 @@ def signatures_from_sites(image, field_name, sites, codemap=None, keep=5,
             print(f"  {field_name}: no anchored site -- refusing to guess")
 
     return sigs
+
+
+def width_mix(sites):
+    """{width: site count} over a field's *whole* anchored pool.
+
+    Recorded at build time so resolve.py can tell a dissenting vote that
+    touches the field the way the field is normally touched from one that
+    does not (resolve.apply_width_rule). It has to be the whole pool, not
+    the handful of kept signatures: on SpawnInfo.HideOffset at 08/19/2026
+    the kept signatures were two 2-byte reads (both wrong) and one 4-byte
+    read (right), so a majority taken among them would have picked the
+    wrong width and thrown away the only correct vote. The pool -- 10
+    4-byte sites against 8 2-byte ones -- did not make that mistake.
+    """
+    mix = {}
+    for site in sites:
+        mix[site.width] = mix.get(site.width, 0) + 1
+    return mix
 
 
 def build_struct_offset_signatures(image, name, old_disp, safe_disps, trusted_globals,

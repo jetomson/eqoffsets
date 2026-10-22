@@ -20,8 +20,9 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from eqoffsets.pe import Section
 from eqoffsets.refs import find_refs
 from eqoffsets.sigbuild import build_offset_signatures
-from eqoffsets.structsig import build_struct_offset_signatures, signatures_from_sites
-from eqoffsets.resolve import resolve_offset, resolve_all
+from eqoffsets.structsig import build_struct_offset_signatures, signatures_from_sites, width_mix
+from eqoffsets.resolve import (resolve_offset, resolve_all, resolve_struct_all,
+                               apply_width_rule, width_note, Resolution)
 from eqoffsets.scan import compile_pattern, find_all, parse_pattern, format_pattern
 from eqoffsets.buildinfo import extract_build_string
 from eqoffsets.codemap import CodeMap, function_ranges
@@ -871,6 +872,150 @@ def test_latest_pair_picks_newest_date():
         assert sigs_path.endswith("2026-08-19.json"), sigs_path
         assert known_path.endswith("2026-08-19.json"), known_path
     print("  _latest_pair picks newest common date ok")
+
+
+# --- access-width consistency (resolve.apply_width_rule) ---------------
+
+def lea_rcx_rax_disp32(d):
+    return b"\x48\x8d\x88" + struct.pack("<i", d)      # lea rcx, [rax+d]   len 7
+
+
+def movzx_ecx_rax_disp32(d):
+    return b"\x0f\xb6\x88" + struct.pack("<i", d)      # movzx ecx,byte[rax+d] len 7
+
+
+def _width_image(byte_disp, lea_disp, n_byte, n_lea, lead_pad):
+    """n_byte anchored byte reads of byte_disp, then n_lea anchored `lea`s of
+    lea_disp, each reached by a fresh PrevOffset (0x10) walk and closed by a
+    unique trailer that also kills rax's taint before the next block."""
+    text = bytearray(b"\x90" * lead_pad)
+    for i in range(n_byte):
+        text += mov_rax_rax_disp8(0x10) + movzx_ecx_rax_disp32(byte_disp)
+        text += unique_trailer(0x5100 + i)
+    for i in range(n_lea):
+        text += mov_rax_rax_disp8(0x10) + lea_rcx_rax_disp32(lea_disp)
+        text += unique_trailer(0x5200 + i)
+    return FakeImage(0x140001000, bytes(text), 0x140800000, bytes(0x1000))
+
+
+def _width_sigdb(old_image, old_disp):
+    codemap = CodeMap(old_image)
+    kind = StructKind(name="SpawnInfo Offsets", link_disps={0x10})
+    sites = find_anchored_sites(old_image, [kind], want={"SpawnInfo Offsets": {old_disp}},
+                                codemap=codemap)["SpawnInfo Offsets"][old_disp]
+    sigs = signatures_from_sites(old_image, "LevelOffset", sites, codemap=codemap,
+                                 keep=9, verbose=False)
+    entry = {"section": "SpawnInfo Offsets", "field": "LevelOffset", "radix": 16,
+             "signatures": sigs, "width_mix": width_mix(sites)}
+    return sites, entry
+
+
+def test_width_recorded_on_sites_and_signatures():
+    """Every anchored site and every struct signature carries how it touches
+    the field, and the pool mix counts the whole pool -- not just the
+    signatures kept -- since that is what the reference width is read from."""
+    old = _width_image(0x270, 0x270, n_byte=3, n_lea=1, lead_pad=0x10)
+    sites, entry = _width_sigdb(old, 0x270)
+    assert sorted(s.width for s in sites) == ["1", "1", "1", "addr"], \
+        [s.width for s in sites]
+    assert entry["width_mix"] == {"1": 3, "addr": 1}, entry["width_mix"]
+    assert sorted(s["width"] for s in entry["signatures"]) == ["1", "1", "1", "addr"], \
+        [s.get("width") for s in entry["signatures"]]
+    print("  access width recorded on sites, signatures and pool mix ok")
+
+
+def test_width_rule_discounts_off_width_dissent():
+    """The real 09/11 -> 10/19/2026 LevelOffset failure: byte reads moved
+    0x270 -> 0x52c, while one `lea rcx, [rdi+0x270]` -- another struct
+    sharing the offset -- moved to 0x268. That one off-width vote left the
+    field UNCONFIRMED and the stale 0x270 shipped. With a 75% dominant width
+    the dissent is discounted: the field confirms at 0x52c, and the
+    discounted vote is still reported rather than dropped."""
+    old = _width_image(0x270, 0x270, n_byte=3, n_lea=1, lead_pad=0x10)
+    new = _width_image(0x52C, 0x268, n_byte=3, n_lea=1, lead_pad=0x37)
+    _, entry = _width_sigdb(old, 0x270)
+    lea_id = next(s["id"] for s in entry["signatures"] if s["width"] == "addr")
+
+    r = resolve_struct_all(new, {"k": entry})["k"]
+    assert r.value == 0x52C and r.consistent, (r.votes, r.discounted)
+    assert r.discounted == {lea_id: "addr"}, r.discounted
+    assert r.votes[lea_id] == 0x268, "discounted vote must stay visible in votes"
+    assert not r.unanimous, "a discount must not be reported as unanimity"
+    assert "discounted off-width dissent" in width_note(r, hex)
+
+    static = {"SpawnInfo Offsets": {"LevelOffset": "0x270"}}
+    res = _evaluate_struct_fields(new, {"struct_offsets": {"k": entry}}, static)[0]
+    assert res["status"] == "confirmed" and res["value"] == "0x52c", res
+    assert "discounted" in res["why"] and res["width_note"], res
+    assert static["SpawnInfo Offsets"]["LevelOffset"] == "0x52c"
+
+    # A sigs file built before widths were recorded must behave exactly as
+    # it always did: real dissent, no confirmation.
+    legacy = dict(entry)
+    del legacy["width_mix"]
+    r = resolve_struct_all(new, {"k": legacy})["k"]
+    assert not r.consistent and not r.discounted and r.width_info is None
+    print("  off-width dissent discounted, LevelOffset confirms at 0x52c, still reported ok")
+
+
+def _fake_resolution(votes):
+    r = Resolution("f")
+    r.votes = dict(votes)
+    r.total = len(votes)
+    counts = {}
+    for v in votes.values():
+        counts[v] = counts.get(v, 0) + 1
+    r.value, r.agreement = max(counts.items(), key=lambda kv: kv[1])
+    return r
+
+
+def test_width_rule_below_dominance_is_advisory_only():
+    """The real 08/19/2026 HideOffset pool was 4-byte at 56%, 2-byte at 44%.
+    Under the 2/3 bar the rule must not act -- the field stays UNCONFIRMED
+    with the exact same plurality it had before -- but it records which way
+    the width evidence points, and that reaches the review doc."""
+    sigs = [{"id": "H#0", "width": "4", "pattern": "00"},
+            {"id": "H#1", "width": "2", "pattern": "00"},
+            {"id": "H#2", "width": "2", "pattern": "00"}]
+    r = _fake_resolution({"H#0": 0x504, "H#1": 0x314, "H#2": 0x314})
+    apply_width_rule(r, sigs, {"4": 10, "2": 8})
+    assert not r.consistent and not r.discounted, r.discounted
+    assert r.value == 0x314, "below threshold the plurality must be left untouched"
+    assert r.width_info and not r.width_info["acted"]
+    note = width_note(r, lambda v: f"0x{v:x}")
+    assert "advisory only" in note and "0x504" in note and "56%" in note, note
+
+    rep = build_field_report("SpawnInfo.HideOffset", r, 16, sigs, _format_disp, None, None,
+                             "0x304", "unconfirmed", r.summary(), width_note=note)
+    md = build_markdown([rep])
+    assert "- width check: advisory only" in md, md
+    print("  below 2/3 dominance: advisory recorded, decision unchanged ok")
+
+
+def test_width_rule_guard_rails():
+    """The rule only ever removes dissent that sits off-width from a
+    unanimous on-width consensus. It must not act when the on-width votes
+    disagree among themselves, must not discount an off-width vote that
+    agrees, and must stay inert for signatures with no recorded width."""
+    mix = {"1": 9, "addr": 1}
+    # On-width votes split: nothing to anchor a decision on.
+    sigs = [{"id": f"L#{i}", "width": w, "pattern": "00"}
+            for i, w in enumerate(["1", "1", "addr"])]
+    r = _fake_resolution({"L#0": 0x52C, "L#1": 0x270, "L#2": 0x268})
+    apply_width_rule(r, sigs, mix)
+    assert not r.consistent and not r.discounted and r.width_info is None
+
+    # Off-width vote that agrees is support, not dissent: nothing to discount.
+    r = _fake_resolution({"L#0": 0x52C, "L#1": 0x52C, "L#2": 0x52C})
+    apply_width_rule(r, sigs, mix)
+    assert r.consistent and not r.discounted and r.width_info is None
+
+    # Signature with no width (pre-width sigs file) leaves the rule inert.
+    sigs[2] = {"id": "L#2", "pattern": "00"}
+    r = _fake_resolution({"L#0": 0x52C, "L#1": 0x52C, "L#2": 0x268})
+    apply_width_rule(r, sigs, mix)
+    assert not r.consistent and not r.discounted
+    print("  width rule guard rails (on-width split, agreeing off-width, no width) ok")
 
 
 if __name__ == "__main__":

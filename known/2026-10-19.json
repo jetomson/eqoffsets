@@ -1,0 +1,70 @@
+{
+  "patch_date": "10/21/2026",
+  "client_hash": "1179fbb14949a2bbd18c4e00f03835aee47ebd9c",
+  "build_string": "Release Client #630 13:46:43 Oct 19 2026",
+  "source": "Published MySEQ offset list, showeq.net forum thread '10/21 offsets' (showthread.php?8425), labeled PatchDate=10/21/2026. Same line-wrap space in the pasted ClientHash as the previous two lists ('...ebd9 c'); closed up it matches eqoffsets.buildinfo.client_hash() on the binary exactly. Binary compiled 10/19/2026, published/labeled 10/21 -- filed under the compile date to pair with binaries/2026-10-19/ for crosscheck.",
+  "binary_sha256": "0a1d49e9d97f64406f16e06a4a8be167469c831a90afa5341776c57c1e97bf3d",
+  "_provenance": {
+    "method": "cli.py resolve --binary binaries/2026-10-19/eqgame.exe --sigs sigs/2026-09-11.json --known known/2026-09-11.json, run cold (no known-offsets for this patch yet), then checked field-by-field against this published list once it arrived.",
+    "comparison_2026_10_21": {
+      "against": "this file (published, PatchDate=10/21/2026)",
+      "result": "39/40 values matched (3 File Info + 6 globals + 31 struct fields).",
+      "memory_offsets": "all 6 matched exactly, including both SPLIT votes (CharInfo 2/5, TargetAddr 2/3). As at the previous two boundaries, every minority signature failed to fire rather than voting for a different address.",
+      "struct_offsets": "27 of 31 auto-confirmed and all correct, including two large shifts (OwnerIDOffset 0x54c -> 0x334, HideOffset 0x504 -> 0x238). 4 were left UNCONFIRMED; 3 of those carried-forward values happened to still be right, 1 was not (LevelOffset)."
+    },
+    "unconfirmed_fields": {
+      "LevelOffset": "0x270 -> 0x52C (published). THE ONE MISMATCH. Raw votes were 0x52c x4 (LevelOffset#2-#5: three 'root', one 'this'), 0x268 x1 (LevelOffset#6, 'this'), 4 no match. The plurality was correct; the single dissent blocked Resolution.consistent and resolve carried the stale 0x270 forward. The dissenting site is 'lea rcx, [rdi+0x270]' feeding a call -- an address-of on a field every correct site accesses as a byte, and the same function's neighbouring '+0x2f0' moved to '+0x2e8', i.e. a different struct that shares the offset, reached through 'this' propagation.",
+      "NameOffset": "0xb4 (published, unchanged). Votes 0xb4 x8, 0x1f6 x1 (NameOffset#8, 'this', a 'mov byte ptr [rcx+0xb4], dl' store that is not a name access).",
+      "IdOffset": "0x10 (published, unchanged). Votes 0x10 x8, 0x8 x1 -- the same lone dissenter as the 07/17->08/19 boundary.",
+      "YOffset": "GroundItem 0x90 (published, unchanged). Votes 0x90 x3, 0x98 x2 (YOffset#1, #7, both 'this'). Notable: none of the 9 YOffset signatures is a float access; several load a qword pointer from +0x90, null-check it and call through it. The value is right because Y did not move, not because these sites are GroundItem.Y."
+    },
+    "anchor_tier_note": "First observed wrong votes from the 'this' tier (LevelOffset#6, GroundItem YOffset#1/#7). Across the previous two boundaries every wrong vote traced to 'linkseed'."
+  },
+  "memory_offsets": {
+    "ZoneAddr": "0x140ECAE64",
+    "SpawnHeaderAddr": "0x140F41E00",
+    "CharInfo": "0x140EC2FB0",
+    "TargetAddr": "0x140DF7080",
+    "ItemsAddr": "0x140EC2100",
+    "WorldAddr": "0x140EC55A0"
+  },
+  "static_sections": {
+    "WorldInfo Offsets": {
+      "WorldHourOffset": "8",
+      "WorldMinuteOffset": "9",
+      "WorldDayOffset": "10",
+      "WorldMonthOffset": "11",
+      "WorldYearOffset": "12"
+    },
+    "SpawnInfo Offsets": {
+      "NextOffset": "0x8",
+      "PrevOffset": "0x10",
+      "LastnameOffset": "0x48",
+      "XOffset": "0x74",
+      "YOffset": "0x78",
+      "ZOffset": "0x7c",
+      "SpeedOffset": "0x8c",
+      "HeadingOffset": "0x90",
+      "NameOffset": "0xb4",
+      "TypeOffset": "0x135",
+      "SpawnIDOffset": "0x168",
+      "OwnerIDOffset": "0x334",
+      "HideOffset": "0x238",
+      "LevelOffset": "0x52c",
+      "ClassOffset": "0xfe4",
+      "RaceOffset": "0xfdc",
+      "PrimaryOffset": "0x10ec",
+      "OffhandOffset": "0x1100"
+    },
+    "GroundItem Offsets": {
+      "PrevOffset": "0x0",
+      "NextOffset": "0x8",
+      "IdOffset": "0x10",
+      "DropIdOffset": "0x18",
+      "XOffset": "0x8c",
+      "YOffset": "0x90",
+      "ZOffset": "0x94",
+      "NameOffset": "0x38"
+    }
+  }
+}

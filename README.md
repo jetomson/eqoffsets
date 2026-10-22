@@ -91,6 +91,12 @@ this binary:
     -> mov byte ptr [rcx + 0x270], al
 ```
 
+If the field has a `width check:` line, read it first. It says which value
+the votes agree on when you count only the ones that touch the field the
+way its code normally does (a byte counter read as a byte, not an `lea`
+taking its address). On 10/19/2026 that line named the correct
+`LevelOffset` (`0x52c`) while the field itself stayed UNCONFIRMED.
+
 Once you've picked the right value:
 
 1. Edit your known-offsets file (`known/<date>.json`) and set that field.
@@ -317,14 +323,28 @@ printed as `UNCONFIRMED` with the full vote breakdown and a review doc (see
 and `crosscheck` score these against ground truth exactly the way they score
 the globals.
 
+One exception to "no dissent", and it is narrow. A struct member has one
+declared type, so the code that really touches it agrees on an access width
+(1/2/4/8 bytes, or `lea` for taking its address). `build` records that width
+for every signature and the width mix across the field's *whole* anchored
+pool. A dissenting vote is then discounted -- still printed, no longer
+blocking -- only if its width differs from the pool's dominant one, the
+on-width votes are unanimous, and that dominant width covers at least 2/3 of
+the pool (`resolve.WIDTH_DOMINANCE`). Below 2/3 the field stays UNCONFIRMED
+and the rule only adds an advisory line to the review. The threshold is
+deliberately conservative: across three boundaries every cutoff from 50% to
+67% produced zero wrong confirmations, and the fields that decide between
+them are single data points.
+
 ### Measured result
 
-Two real patch boundaries so far, both built from the older binary and
+Three real patch boundaries so far, each built from the older binary and
 scored against a published list for the newer one:
 
 ```
 07/17/2026 -> 08/19/2026:  37 passed, 0 failed   (6 memory offsets + 31 struct fields)
 08/19/2026 -> 09/11/2026:  36 passed, 1 failed
+09/11/2026 -> 10/19/2026:  37 passed, 0 failed
 ```
 
 The 07/17→08/19 boundary includes the six fields that patch actually moved --
@@ -344,18 +364,30 @@ where the plurality was **wrong** -- see "If a field says UNCONFIRMED" above
 for the worked example, since it is the clearest real case yet for why
 `resolve` requires no dissent at all rather than just a majority.
 
-Run `crosscheck` to reproduce either boundary; it writes
+The 09/11→10/19 boundary derived two large shifts on its own
+(`OwnerIDOffset` `0x54c`→`0x334`, `HideOffset` `0x504`→`0x238`) and matched
+the published list on 39 of 40 values. The miss was `LevelOffset`: four
+votes said `0x52c` (correct), one `this`-anchored `lea` said `0x268`, and
+the stale `0x270` was carried forward. That case is what motivated the
+width check above; at the 2/3 threshold it does not rescue `LevelOffset`
+(its pool is 60% byte reads) but does name `0x52c` in the review, and it
+confirms `NameOffset` and `GroundItem.IdOffset`, which were also unconfirmed.
+
+Run `crosscheck` to reproduce any boundary; it writes
 `crosscheck_report.json` with per-signature and per-anchor-kind survival
-rates. Aggregated across both boundaries so far:
+rates. Aggregated across all three boundaries:
 
 ```
   anchor              fired   right when fired
-  root         169/204 (82%)      168/169 (99%)
-  this         104/159 (65%)      101/104 (97%)
-  linkseed      72/77  (93%)       68/72  (94%)
-  rip_global    45/54  (83%)       45/45  (100%)
-  link           8/8   (100%)         8/8   (100%)
+  root         262/306 (85%)      261/262 (99%)
+  this         162/241 (67%)      154/162 (95%)
+  linkseed     107/114 (93%)      103/107 (96%)
+  rip_global    68/81  (83%)       68/68  (100%)
+  link          12/12  (100%)      12/12  (100%)
 ```
 
-Every wrong vote across both boundaries traced back to `linkseed`, the
-weakest anchor tier by design -- exactly what it is scored last for.
+Through two boundaries every wrong vote traced to `linkseed`. The third
+broke that: all of its wrong votes were `this`-anchored, which now has the
+lower right-when-fired rate of the two. `this` propagation reaches
+accessors that belong to other structs sharing an offset, and that is
+exactly the case the width check catches.

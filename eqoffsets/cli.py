@@ -10,8 +10,8 @@ from .pe import PEImage
 from .codemap import CodeMap
 from .anchor import StructKind, find_anchored_sites
 from .sigbuild import build_offset_signatures
-from .structsig import signatures_from_sites
-from .resolve import resolve_all
+from .structsig import signatures_from_sites, width_mix
+from .resolve import resolve_all, resolve_struct_all, width_note, width_label
 from .validate import validate_all, validate_struct_offset, print_report
 from .emit_ini import write_ini
 from .buildinfo import client_hash as extract_client_hash, extract_build_string
@@ -195,6 +195,7 @@ def cmd_build(args):
                 "radix": STRUCT_SECTIONS[sec_name]["radix"],
                 "known_value": _format_disp(old_disp, STRUCT_SECTIONS[sec_name]["radix"]),
                 "anchored_sites": len(sites),
+                "width_mix": width_mix(sites),
                 "signatures": sigs,
             }
             if not sigs:
@@ -265,7 +266,7 @@ def _evaluate_struct_fields(image, sigdb, static, best_effort=False):
     struct_sigs = sigdb.get("struct_offsets", {})
     if not struct_sigs:
         return []
-    struct_resolutions = resolve_all(image, {"offsets": struct_sigs})
+    struct_resolutions = resolve_struct_all(image, struct_sigs)
 
     results = []
     for key, entry in struct_sigs.items():
@@ -281,7 +282,13 @@ def _evaluate_struct_fields(image, sigdb, static, best_effort=False):
         if r and r.ok and r.consistent and not problems:
             value = _format_disp(r.value, radix)
             status = "confirmed"
-            why = "unanimous" if r.unanimous else f"{r.agreement}/{r.agreement} fired, no dissent"
+            if r.unanimous:
+                why = "unanimous"
+            elif r.discounted:
+                why = (f"{r.agreement}/{r.agreement} on-width fired, no on-width dissent, "
+                       f"{len(r.discounted)} off-width dissent discounted")
+            else:
+                why = f"{r.agreement}/{r.agreement} fired, no dissent"
             static.setdefault(sec_name, {})[field] = value
         elif best_effort and r and r.ok and not problems:
             value = _format_disp(r.value, radix)
@@ -297,6 +304,7 @@ def _evaluate_struct_fields(image, sigdb, static, best_effort=False):
             "key": key, "sec_name": sec_name, "field": field, "label": label,
             "radix": radix, "status": status, "value": value, "why": why,
             "known_val": known_val, "r": r, "signatures": signatures,
+            "width_note": width_note(r, lambda v, _radix=radix: _format_disp(v, _radix)),
         })
     return results
 
@@ -363,11 +371,19 @@ def cmd_resolve(args):
                         and str(res["known_val"]).lower() != res["value"].lower()):
                     tag = f"  (known-offsets had {res['known_val']} -- updating)"
                 print(f"  {label}: {res['value']} [{why}]{tag}")
+                # Discounted dissent is still dissent the reader is entitled
+                # to see (CLAUDE.md invariant 5) -- it just no longer blocks.
+                if res["width_note"]:
+                    print(f"      {res['width_note']}")
+                    for sid, w in r.discounted.items():
+                        print(f"      - {sid}: voted {_format_disp(r.votes[sid], radix)}"
+                              f"  <- discounted, {width_label(w)} access")
                 continue
 
             rep = build_field_report(label, r, radix, res["signatures"], _format_disp,
                                      codemap, old_codemap, res["known_val"],
-                                     res["status"], why, applied_val=res["value"])
+                                     res["status"], why, applied_val=res["value"],
+                                     width_note=res["width_note"])
             review_reports.append(rep)
             if res["status"] == "best_effort":
                 print(f"  {label}: {res['value']} [BEST-EFFORT, {why}]")
@@ -380,6 +396,8 @@ def cmd_resolve(args):
                         print(f"      - {sid}: voted {_format_disp(val, radix)}{tag}")
                     for sid, reason in r.failures.items():
                         print(f"      - {sid}: {reason}")
+            if res["width_note"]:
+                print(f"      {res['width_note']}")
             _print_candidates(rep)
 
         struct_undetermined = [res["label"] for res in results if res["status"] == "unconfirmed"]
@@ -439,7 +457,7 @@ def cmd_selftest(args):
 
     struct_sigs = sigdb.get("struct_offsets", {})
     if struct_sigs:
-        struct_resolutions = resolve_all(image, {"offsets": struct_sigs})
+        struct_resolutions = resolve_struct_all(image, struct_sigs)
         known_static = known.get("static_sections", {})
         print("\n--- struct member offsets vs known-good ---")
         for key, entry in struct_sigs.items():
@@ -565,9 +583,10 @@ def _check_pair(old_image, old_known_data, new_image, new_known_data, keep=5,
         struct_sigs[_struct_key(sec_name, field)] = {
             "section": sec_name, "field": field,
             "radix": STRUCT_SECTIONS[sec_name]["radix"], "signatures": sigs,
+            "width_mix": width_mix(sites),
         }
 
-    struct_res = resolve_all(new_image, {"offsets": struct_sigs})
+    struct_res = resolve_struct_all(new_image, struct_sigs)
     for key, entry in struct_sigs.items():
         sec_name, field = entry["section"], entry["field"]
         want_str = new_static.get(sec_name, {}).get(field)
@@ -583,6 +602,7 @@ def _check_pair(old_image, old_known_data, new_image, new_known_data, keep=5,
             "unanimous": r.unanimous if (r and r.ok) else False,
             "consistent": r.consistent if (r and r.ok) else False,
             "radix": radix,
+            "discounted": dict(r.discounted) if r else {},
             "sig_results": _sig_results(entry["signatures"], r, want),
         }
     return result
@@ -657,6 +677,8 @@ def cmd_crosscheck(args):
             got = entry["got"]
             if entry["passed"]:
                 tag = "" if entry["consistent"] else "  [SPLIT]"
+                if entry.get("discounted"):
+                    tag += f"  [{len(entry['discounted'])} off-width dissent discounted]"
                 print(f"    ok   {name}: {_format_disp(got, radix)}{tag}")
                 passed_n += 1
             else:
@@ -701,6 +723,7 @@ def cmd_crosscheck(args):
                     "passed": entry["passed"],
                     "unanimous": entry["unanimous"],
                     "consistent": entry["consistent"],
+                    "discounted": entry.get("discounted", {}),
                     "sig_results": {
                         sid: {
                             "matched": sr["matched"],

@@ -121,19 +121,37 @@ def function_ranges(image):
 class MemAccess:
     """One `[base + disp]` operand: the unit struct-offset derivation votes on."""
 
-    __slots__ = ("insn", "base_family", "disp", "disp_off", "disp_size", "is_write")
+    __slots__ = ("insn", "base_family", "disp", "disp_off", "disp_size", "is_write",
+                 "op_size")
 
-    def __init__(self, insn, base_family, disp, disp_off, disp_size, is_write):
+    def __init__(self, insn, base_family, disp, disp_off, disp_size, is_write, op_size=0):
         self.insn = insn
         self.base_family = base_family
         self.disp = disp
         self.disp_off = disp_off
         self.disp_size = disp_size
         self.is_write = is_write
+        self.op_size = op_size
 
     @property
     def va(self):
         return self.insn.address
+
+    @property
+    def width(self):
+        """How this site touches the field: bytes moved, or "addr" for `lea`.
+
+        A struct member has one declared type, so the real accesses to it
+        overwhelmingly agree on a width; a site that disagrees with that is
+        usually a different struct that happens to share the offset (see
+        structsig.width_mix). `lea` is kept apart from every size because it
+        moves nothing -- it takes the field's address, which for a byte
+        counter like LevelOffset is a strong sign the site is not the field.
+        Float and integer moves of the same size are deliberately *not*
+        distinguished: position floats are copied with plain `mov dword` as
+        often as they are read with `movss`.
+        """
+        return "addr" if self.insn.mnemonic == "lea" else str(self.op_size)
 
     @property
     def text(self):
@@ -245,6 +263,7 @@ class CodeMap:
                 disp_off=insn.encoding.disp_offset,
                 disp_size=insn.encoding.disp_size,
                 is_write=(idx == 0),
+                op_size=op.size,
             ))
         return out
 

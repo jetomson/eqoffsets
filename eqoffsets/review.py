@@ -69,7 +69,7 @@ def _window_lines(codemap, va):
 
 
 def build_field_report(label, r, radix, signatures, format_disp, codemap, old_codemap,
-                       known_val, status, why, applied_val=None):
+                       known_val, status, why, applied_val=None, width_note=None):
     """Everything needed to describe one struct field's outcome to both the
     console and the review doc.
 
@@ -85,6 +85,10 @@ def build_field_report(label, r, radix, signatures, format_disp, codemap, old_co
     `old_codemap` (optional -- None when the original binary has moved,
     been deleted, or changed) disassembles in the binary signatures were
     built from, for the side-by-side comparison.
+
+    `width_note` is resolve.width_note()'s line about access widths, if the
+    width check had anything to say -- below its threshold that is often
+    the single most useful hint a reviewer gets.
     """
     candidates = gather_candidates(r, signatures)
     for c in candidates:
@@ -101,6 +105,7 @@ def build_field_report(label, r, radix, signatures, format_disp, codemap, old_co
         "applied_val": applied_val if applied_val is not None else known_val,
         "status": status,
         "why": why,
+        "width_note": width_note,
         "candidates": candidates,
         "failures": dict(r.failures) if r else {},
     }
@@ -147,6 +152,8 @@ def build_markdown(reports, meta=None):
         lines.append("")
         lines.append(f"- status: **{rep['status'].upper().replace('_', '-')}**")
         lines.append(f"- reason: {rep['why']}")
+        if rep.get("width_note"):
+            lines.append(f"- width check: {rep['width_note']}")
         if rep["status"] == "best_effort" and rep["applied_val"] != rep["known_val"]:
             lines.append(f"- value applied (BEST-EFFORT, not independently confirmed): "
                          f"`{rep['applied_val']}` (was `{rep['known_val']}`)")

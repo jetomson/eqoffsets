@@ -150,7 +150,7 @@ def distinctive_disps(kinds):
 
 class AnchoredSite:
     __slots__ = ("kind", "va", "disp", "disp_off", "disp_size",
-                 "fn_start", "fn_end", "anchor", "text", "is_write")
+                 "fn_start", "fn_end", "anchor", "text", "is_write", "width")
 
     def __init__(self, kind, access, fn_start, fn_end, anchor):
         self.kind = kind
@@ -163,6 +163,7 @@ class AnchoredSite:
         self.anchor = anchor
         self.text = access.text
         self.is_write = access.is_write
+        self.width = access.width
 
     @property
     def strength(self):

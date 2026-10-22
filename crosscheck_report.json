@@ -3,10 +3,11 @@
     "patches": [
       "2026-07-17",
       "2026-08-19",
-      "2026-09-11"
+      "2026-09-11",
+      "2026-10-19"
     ],
-    "boundaries_tested": 2,
-    "generated_utc": "2026-09-16T23:25:43"
+    "boundaries_tested": 3,
+    "generated_utc": "2026-10-21T23:55:48"
   },
   "boundaries": [
     {
@@ -19,6 +20,7 @@
           "passed": true,
           "unanimous": true,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "ZoneAddr#0": {
               "matched": true,
@@ -63,6 +65,7 @@
           "passed": true,
           "unanimous": true,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "SpawnHeaderAddr#0": {
               "matched": true,
@@ -107,6 +110,7 @@
           "passed": true,
           "unanimous": false,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "CharInfo#0": {
               "matched": false,
@@ -151,6 +155,7 @@
           "passed": true,
           "unanimous": false,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "TargetAddr#0": {
               "matched": false,
@@ -181,6 +186,7 @@
           "passed": true,
           "unanimous": true,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "ItemsAddr#0": {
               "matched": true,
@@ -218,6 +224,7 @@
           "passed": true,
           "unanimous": true,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "WorldAddr#0": {
               "matched": true,
@@ -262,6 +269,7 @@
           "passed": true,
           "unanimous": false,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "NextOffset#0": {
               "matched": false,
@@ -334,6 +342,7 @@
           "passed": true,
           "unanimous": false,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "PrevOffset#0": {
               "matched": true,
@@ -406,6 +415,7 @@
           "passed": true,
           "unanimous": true,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "LastnameOffset#0": {
               "matched": true,
@@ -478,6 +488,7 @@
           "passed": true,
           "unanimous": true,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "XOffset#0": {
               "matched": true,
@@ -550,6 +561,7 @@
           "passed": true,
           "unanimous": false,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "YOffset#0": {
               "matched": true,
@@ -622,6 +634,7 @@
           "passed": true,
           "unanimous": true,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "ZOffset#0": {
               "matched": true,
@@ -694,6 +707,7 @@
           "passed": true,
           "unanimous": false,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "SpeedOffset#0": {
               "matched": false,
@@ -766,6 +780,7 @@
           "passed": true,
           "unanimous": false,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "HeadingOffset#0": {
               "matched": false,
@@ -838,6 +853,7 @@
           "passed": true,
           "unanimous": true,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "NameOffset#0": {
               "matched": true,
@@ -910,6 +926,7 @@
           "passed": true,
           "unanimous": false,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "TypeOffset#0": {
               "matched": true,
@@ -982,6 +999,7 @@
           "passed": true,
           "unanimous": false,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "SpawnIDOffset#0": {
               "matched": true,
@@ -1054,6 +1072,7 @@
           "passed": true,
           "unanimous": false,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "OwnerIDOffset#0": {
               "matched": false,
@@ -1126,6 +1145,7 @@
           "passed": true,
           "unanimous": true,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "HideOffset#0": {
               "matched": true,
@@ -1191,6 +1211,7 @@
           "passed": true,
           "unanimous": false,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "LevelOffset#0": {
               "matched": false,
@@ -1242,6 +1263,7 @@
           "passed": true,
           "unanimous": false,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "ClassOffset#0": {
               "matched": false,
@@ -1314,6 +1336,7 @@
           "passed": true,
           "unanimous": false,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "RaceOffset#0": {
               "matched": false,
@@ -1372,6 +1395,7 @@
           "passed": true,
           "unanimous": false,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "PrimaryOffset#0": {
               "matched": false,
@@ -1395,6 +1419,7 @@
           "passed": true,
           "unanimous": false,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "OffhandOffset#0": {
               "matched": false,
@@ -1418,6 +1443,7 @@
           "passed": true,
           "unanimous": true,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "PrevOffset#0": {
               "matched": true,
@@ -1490,6 +1516,7 @@
           "passed": true,
           "unanimous": false,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "NextOffset#0": {
               "matched": false,
@@ -1562,6 +1589,7 @@
           "passed": true,
           "unanimous": false,
           "consistent": false,
+          "discounted": {},
           "sig_results": {
             "IdOffset#0": {
               "matched": true,
@@ -1634,6 +1662,7 @@
           "passed": true,
           "unanimous": false,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "DropIdOffset#0": {
               "matched": true,
@@ -1706,6 +1735,7 @@
           "passed": true,
           "unanimous": true,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "XOffset#0": {
               "matched": true,
@@ -1757,6 +1787,7 @@
           "passed": true,
           "unanimous": false,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "YOffset#0": {
               "matched": false,
@@ -1829,6 +1860,7 @@
           "passed": true,
           "unanimous": true,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "ZOffset#0": {
               "matched": true,
@@ -1845,6 +1877,7 @@
           "passed": true,
           "unanimous": false,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "NameOffset#0": {
               "matched": true,
@@ -1917,6 +1950,7 @@
           "passed": true,
           "unanimous": true,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "WorldHourOffset#0": {
               "matched": true,
@@ -1989,6 +2023,7 @@
           "passed": true,
           "unanimous": true,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "WorldMinuteOffset#0": {
               "matched": true,
@@ -2047,6 +2082,7 @@
           "passed": true,
           "unanimous": true,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "WorldDayOffset#0": {
               "matched": true,
@@ -2063,6 +2099,7 @@
           "passed": true,
           "unanimous": true,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "WorldMonthOffset#0": {
               "matched": true,
@@ -2079,6 +2116,7 @@
           "passed": true,
           "unanimous": true,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "WorldYearOffset#0": {
               "matched": true,
@@ -2101,6 +2139,7 @@
           "passed": true,
           "unanimous": false,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "ZoneAddr#0": {
               "matched": false,
@@ -2145,6 +2184,7 @@
           "passed": true,
           "unanimous": true,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "SpawnHeaderAddr#0": {
               "matched": true,
@@ -2189,6 +2229,7 @@
           "passed": true,
           "unanimous": false,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "CharInfo#0": {
               "matched": false,
@@ -2233,6 +2274,7 @@
           "passed": true,
           "unanimous": false,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "TargetAddr#0": {
               "matched": false,
@@ -2263,6 +2305,7 @@
           "passed": true,
           "unanimous": true,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "ItemsAddr#0": {
               "matched": true,
@@ -2300,6 +2343,7 @@
           "passed": true,
           "unanimous": true,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "WorldAddr#0": {
               "matched": true,
@@ -2344,6 +2388,7 @@
           "passed": true,
           "unanimous": false,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "NextOffset#0": {
               "matched": false,
@@ -2416,6 +2461,7 @@
           "passed": true,
           "unanimous": false,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "PrevOffset#0": {
               "matched": true,
@@ -2488,6 +2534,7 @@
           "passed": true,
           "unanimous": true,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "LastnameOffset#0": {
               "matched": true,
@@ -2560,6 +2607,7 @@
           "passed": true,
           "unanimous": true,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "XOffset#0": {
               "matched": true,
@@ -2632,6 +2680,7 @@
           "passed": true,
           "unanimous": false,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "YOffset#0": {
               "matched": true,
@@ -2704,6 +2753,7 @@
           "passed": true,
           "unanimous": true,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "ZOffset#0": {
               "matched": true,
@@ -2776,6 +2826,7 @@
           "passed": true,
           "unanimous": false,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "SpeedOffset#0": {
               "matched": false,
@@ -2848,6 +2899,7 @@
           "passed": true,
           "unanimous": false,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "HeadingOffset#0": {
               "matched": false,
@@ -2920,6 +2972,7 @@
           "passed": true,
           "unanimous": true,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "NameOffset#0": {
               "matched": true,
@@ -2992,6 +3045,7 @@
           "passed": true,
           "unanimous": false,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "TypeOffset#0": {
               "matched": true,
@@ -3064,6 +3118,7 @@
           "passed": true,
           "unanimous": false,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "SpawnIDOffset#0": {
               "matched": true,
@@ -3136,6 +3191,7 @@
           "passed": true,
           "unanimous": false,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "OwnerIDOffset#0": {
               "matched": false,
@@ -3208,6 +3264,7 @@
           "passed": false,
           "unanimous": false,
           "consistent": false,
+          "discounted": {},
           "sig_results": {
             "HideOffset#0": {
               "matched": false,
@@ -3280,6 +3337,7 @@
           "passed": true,
           "unanimous": false,
           "consistent": false,
+          "discounted": {},
           "sig_results": {
             "LevelOffset#0": {
               "matched": false,
@@ -3352,6 +3410,7 @@
           "passed": true,
           "unanimous": false,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "ClassOffset#0": {
               "matched": false,
@@ -3424,6 +3483,7 @@
           "passed": true,
           "unanimous": false,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "RaceOffset#0": {
               "matched": false,
@@ -3482,6 +3542,7 @@
           "passed": true,
           "unanimous": false,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "PrimaryOffset#0": {
               "matched": false,
@@ -3505,6 +3566,7 @@
           "passed": true,
           "unanimous": false,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "OffhandOffset#0": {
               "matched": false,
@@ -3528,6 +3590,7 @@
           "passed": true,
           "unanimous": false,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "PrevOffset#0": {
               "matched": true,
@@ -3600,6 +3663,7 @@
           "passed": true,
           "unanimous": false,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "NextOffset#0": {
               "matched": false,
@@ -3672,6 +3736,7 @@
           "passed": true,
           "unanimous": false,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "IdOffset#0": {
               "matched": true,
@@ -3744,6 +3809,7 @@
           "passed": true,
           "unanimous": false,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "DropIdOffset#0": {
               "matched": true,
@@ -3816,6 +3882,7 @@
           "passed": true,
           "unanimous": true,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "XOffset#0": {
               "matched": true,
@@ -3867,6 +3934,7 @@
           "passed": true,
           "unanimous": false,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "YOffset#0": {
               "matched": true,
@@ -3939,6 +4007,7 @@
           "passed": true,
           "unanimous": true,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "ZOffset#0": {
               "matched": true,
@@ -3955,6 +4024,7 @@
           "passed": true,
           "unanimous": false,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "NameOffset#0": {
               "matched": true,
@@ -4027,6 +4097,7 @@
           "passed": true,
           "unanimous": true,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "WorldHourOffset#0": {
               "matched": true,
@@ -4099,6 +4170,7 @@
           "passed": true,
           "unanimous": true,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "WorldMinuteOffset#0": {
               "matched": true,
@@ -4157,6 +4229,7 @@
           "passed": true,
           "unanimous": true,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "WorldDayOffset#0": {
               "matched": true,
@@ -4173,6 +4246,7 @@
           "passed": true,
           "unanimous": true,
           "consistent": true,
+          "discounted": {},
           "sig_results": {
             "WorldMonthOffset#0": {
               "matched": true,
@@ -4189,6 +4263,2151 @@
           "passed": true,
           "unanimous": true,
           "consistent": true,
+          "discounted": {},
+          "sig_results": {
+            "WorldYearOffset#0": {
+              "matched": true,
+              "value": "12",
+              "correct": true,
+              "failure": null,
+              "anchor": "this"
+            }
+          }
+        }
+      }
+    },
+    {
+      "from": "2026-09-11",
+      "to": "2026-10-19",
+      "offsets": {
+        "ZoneAddr": {
+          "expected": "0x140ecae64",
+          "got": "0x140ecae64",
+          "passed": true,
+          "unanimous": true,
+          "consistent": true,
+          "discounted": {},
+          "sig_results": {
+            "ZoneAddr#0": {
+              "matched": true,
+              "value": "0x140ecae64",
+              "correct": true,
+              "failure": null,
+              "anchor": null
+            },
+            "ZoneAddr#1": {
+              "matched": true,
+              "value": "0x140ecae64",
+              "correct": true,
+              "failure": null,
+              "anchor": null
+            },
+            "ZoneAddr#2": {
+              "matched": true,
+              "value": "0x140ecae64",
+              "correct": true,
+              "failure": null,
+              "anchor": null
+            },
+            "ZoneAddr#3": {
+              "matched": true,
+              "value": "0x140ecae64",
+              "correct": true,
+              "failure": null,
+              "anchor": null
+            },
+            "ZoneAddr#4": {
+              "matched": true,
+              "value": "0x140ecae64",
+              "correct": true,
+              "failure": null,
+              "anchor": null
+            }
+          }
+        },
+        "SpawnHeaderAddr": {
+          "expected": "0x140f41e00",
+          "got": "0x140f41e00",
+          "passed": true,
+          "unanimous": true,
+          "consistent": true,
+          "discounted": {},
+          "sig_results": {
+            "SpawnHeaderAddr#0": {
+              "matched": true,
+              "value": "0x140f41e00",
+              "correct": true,
+              "failure": null,
+              "anchor": null
+            },
+            "SpawnHeaderAddr#1": {
+              "matched": true,
+              "value": "0x140f41e00",
+              "correct": true,
+              "failure": null,
+              "anchor": null
+            },
+            "SpawnHeaderAddr#2": {
+              "matched": true,
+              "value": "0x140f41e00",
+              "correct": true,
+              "failure": null,
+              "anchor": null
+            },
+            "SpawnHeaderAddr#3": {
+              "matched": true,
+              "value": "0x140f41e00",
+              "correct": true,
+              "failure": null,
+              "anchor": null
+            },
+            "SpawnHeaderAddr#4": {
+              "matched": true,
+              "value": "0x140f41e00",
+              "correct": true,
+              "failure": null,
+              "anchor": null
+            }
+          }
+        },
+        "CharInfo": {
+          "expected": "0x140ec2fb0",
+          "got": "0x140ec2fb0",
+          "passed": true,
+          "unanimous": false,
+          "consistent": true,
+          "discounted": {},
+          "sig_results": {
+            "CharInfo#0": {
+              "matched": false,
+              "value": null,
+              "correct": false,
+              "failure": "no match",
+              "anchor": null
+            },
+            "CharInfo#1": {
+              "matched": false,
+              "value": null,
+              "correct": false,
+              "failure": "no match",
+              "anchor": null
+            },
+            "CharInfo#2": {
+              "matched": false,
+              "value": null,
+              "correct": false,
+              "failure": "no match",
+              "anchor": null
+            },
+            "CharInfo#3": {
+              "matched": true,
+              "value": "0x140ec2fb0",
+              "correct": true,
+              "failure": null,
+              "anchor": null
+            },
+            "CharInfo#4": {
+              "matched": true,
+              "value": "0x140ec2fb0",
+              "correct": true,
+              "failure": null,
+              "anchor": null
+            }
+          }
+        },
+        "TargetAddr": {
+          "expected": "0x140df7080",
+          "got": "0x140df7080",
+          "passed": true,
+          "unanimous": false,
+          "consistent": true,
+          "discounted": {},
+          "sig_results": {
+            "TargetAddr#0": {
+              "matched": false,
+              "value": null,
+              "correct": false,
+              "failure": "no match",
+              "anchor": null
+            },
+            "TargetAddr#1": {
+              "matched": true,
+              "value": "0x140df7080",
+              "correct": true,
+              "failure": null,
+              "anchor": null
+            },
+            "TargetAddr#2": {
+              "matched": true,
+              "value": "0x140df7080",
+              "correct": true,
+              "failure": null,
+              "anchor": null
+            }
+          }
+        },
+        "ItemsAddr": {
+          "expected": "0x140ec2100",
+          "got": "0x140ec2100",
+          "passed": true,
+          "unanimous": true,
+          "consistent": true,
+          "discounted": {},
+          "sig_results": {
+            "ItemsAddr#0": {
+              "matched": true,
+              "value": "0x140ec2100",
+              "correct": true,
+              "failure": null,
+              "anchor": null
+            },
+            "ItemsAddr#1": {
+              "matched": true,
+              "value": "0x140ec2100",
+              "correct": true,
+              "failure": null,
+              "anchor": null
+            },
+            "ItemsAddr#2": {
+              "matched": true,
+              "value": "0x140ec2100",
+              "correct": true,
+              "failure": null,
+              "anchor": null
+            },
+            "ItemsAddr#3": {
+              "matched": true,
+              "value": "0x140ec2100",
+              "correct": true,
+              "failure": null,
+              "anchor": null
+            }
+          }
+        },
+        "WorldAddr": {
+          "expected": "0x140ec55a0",
+          "got": "0x140ec55a0",
+          "passed": true,
+          "unanimous": true,
+          "consistent": true,
+          "discounted": {},
+          "sig_results": {
+            "WorldAddr#0": {
+              "matched": true,
+              "value": "0x140ec55a0",
+              "correct": true,
+              "failure": null,
+              "anchor": null
+            },
+            "WorldAddr#1": {
+              "matched": true,
+              "value": "0x140ec55a0",
+              "correct": true,
+              "failure": null,
+              "anchor": null
+            },
+            "WorldAddr#2": {
+              "matched": true,
+              "value": "0x140ec55a0",
+              "correct": true,
+              "failure": null,
+              "anchor": null
+            },
+            "WorldAddr#3": {
+              "matched": true,
+              "value": "0x140ec55a0",
+              "correct": true,
+              "failure": null,
+              "anchor": null
+            },
+            "WorldAddr#4": {
+              "matched": true,
+              "value": "0x140ec55a0",
+              "correct": true,
+              "failure": null,
+              "anchor": null
+            }
+          }
+        },
+        "SpawnInfo.NextOffset": {
+          "expected": "0x8",
+          "got": "0x8",
+          "passed": true,
+          "unanimous": false,
+          "consistent": true,
+          "discounted": {},
+          "sig_results": {
+            "NextOffset#0": {
+              "matched": false,
+              "value": null,
+              "correct": false,
+              "failure": "no match",
+              "anchor": "this"
+            },
+            "NextOffset#1": {
+              "matched": false,
+              "value": null,
+              "correct": false,
+              "failure": "no match",
+              "anchor": "this"
+            },
+            "NextOffset#2": {
+              "matched": false,
+              "value": null,
+              "correct": false,
+              "failure": "no match",
+              "anchor": "this"
+            },
+            "NextOffset#3": {
+              "matched": true,
+              "value": "0x8",
+              "correct": true,
+              "failure": null,
+              "anchor": "this"
+            },
+            "NextOffset#4": {
+              "matched": false,
+              "value": null,
+              "correct": false,
+              "failure": "no match",
+              "anchor": "this"
+            },
+            "NextOffset#5": {
+              "matched": true,
+              "value": "0x8",
+              "correct": true,
+              "failure": null,
+              "anchor": "this"
+            },
+            "NextOffset#6": {
+              "matched": false,
+              "value": null,
+              "correct": false,
+              "failure": "no match",
+              "anchor": "this"
+            },
+            "NextOffset#7": {
+              "matched": false,
+              "value": null,
+              "correct": false,
+              "failure": "no match",
+              "anchor": "this"
+            },
+            "NextOffset#8": {
+              "matched": false,
+              "value": null,
+              "correct": false,
+              "failure": "no match",
+              "anchor": "this"
+            }
+          }
+        },
+        "SpawnInfo.PrevOffset": {
+          "expected": "0x10",
+          "got": "0x10",
+          "passed": true,
+          "unanimous": false,
+          "consistent": true,
+          "discounted": {},
+          "sig_results": {
+            "PrevOffset#0": {
+              "matched": true,
+              "value": "0x10",
+              "correct": true,
+              "failure": null,
+              "anchor": "this"
+            },
+            "PrevOffset#1": {
+              "matched": true,
+              "value": "0x10",
+              "correct": true,
+              "failure": null,
+              "anchor": "this"
+            },
+            "PrevOffset#2": {
+              "matched": true,
+              "value": "0x10",
+              "correct": true,
+              "failure": null,
+              "anchor": "this"
+            },
+            "PrevOffset#3": {
+              "matched": true,
+              "value": "0x10",
+              "correct": true,
+              "failure": null,
+              "anchor": "this"
+            },
+            "PrevOffset#4": {
+              "matched": true,
+              "value": "0x10",
+              "correct": true,
+              "failure": null,
+              "anchor": "this"
+            },
+            "PrevOffset#5": {
+              "matched": true,
+              "value": "0x10",
+              "correct": true,
+              "failure": null,
+              "anchor": "link"
+            },
+            "PrevOffset#6": {
+              "matched": true,
+              "value": "0x10",
+              "correct": true,
+              "failure": null,
+              "anchor": "this"
+            },
+            "PrevOffset#7": {
+              "matched": true,
+              "value": "0x10",
+              "correct": true,
+              "failure": null,
+              "anchor": "this"
+            },
+            "PrevOffset#8": {
+              "matched": false,
+              "value": null,
+              "correct": false,
+              "failure": "no match",
+              "anchor": "this"
+            }
+          }
+        },
+        "SpawnInfo.LastnameOffset": {
+          "expected": "0x48",
+          "got": "0x48",
+          "passed": true,
+          "unanimous": true,
+          "consistent": true,
+          "discounted": {},
+          "sig_results": {
+            "LastnameOffset#0": {
+              "matched": true,
+              "value": "0x48",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "LastnameOffset#1": {
+              "matched": true,
+              "value": "0x48",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "LastnameOffset#2": {
+              "matched": true,
+              "value": "0x48",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "LastnameOffset#3": {
+              "matched": true,
+              "value": "0x48",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "LastnameOffset#4": {
+              "matched": true,
+              "value": "0x48",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "LastnameOffset#5": {
+              "matched": true,
+              "value": "0x48",
+              "correct": true,
+              "failure": null,
+              "anchor": "this"
+            },
+            "LastnameOffset#6": {
+              "matched": true,
+              "value": "0x48",
+              "correct": true,
+              "failure": null,
+              "anchor": "link"
+            },
+            "LastnameOffset#7": {
+              "matched": true,
+              "value": "0x48",
+              "correct": true,
+              "failure": null,
+              "anchor": "this"
+            },
+            "LastnameOffset#8": {
+              "matched": true,
+              "value": "0x48",
+              "correct": true,
+              "failure": null,
+              "anchor": "this"
+            }
+          }
+        },
+        "SpawnInfo.XOffset": {
+          "expected": "0x74",
+          "got": "0x74",
+          "passed": true,
+          "unanimous": true,
+          "consistent": true,
+          "discounted": {},
+          "sig_results": {
+            "XOffset#0": {
+              "matched": true,
+              "value": "0x74",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "XOffset#1": {
+              "matched": true,
+              "value": "0x74",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "XOffset#2": {
+              "matched": true,
+              "value": "0x74",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "XOffset#3": {
+              "matched": true,
+              "value": "0x74",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "XOffset#4": {
+              "matched": true,
+              "value": "0x74",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "XOffset#5": {
+              "matched": true,
+              "value": "0x74",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "XOffset#6": {
+              "matched": true,
+              "value": "0x74",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "XOffset#7": {
+              "matched": true,
+              "value": "0x74",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "XOffset#8": {
+              "matched": true,
+              "value": "0x74",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            }
+          }
+        },
+        "SpawnInfo.YOffset": {
+          "expected": "0x78",
+          "got": "0x78",
+          "passed": true,
+          "unanimous": false,
+          "consistent": true,
+          "discounted": {},
+          "sig_results": {
+            "YOffset#0": {
+              "matched": true,
+              "value": "0x78",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "YOffset#1": {
+              "matched": true,
+              "value": "0x78",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "YOffset#2": {
+              "matched": true,
+              "value": "0x78",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "YOffset#3": {
+              "matched": true,
+              "value": "0x78",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "YOffset#4": {
+              "matched": true,
+              "value": "0x78",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "YOffset#5": {
+              "matched": false,
+              "value": null,
+              "correct": false,
+              "failure": "no match",
+              "anchor": "root"
+            },
+            "YOffset#6": {
+              "matched": true,
+              "value": "0x78",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "YOffset#7": {
+              "matched": true,
+              "value": "0x78",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "YOffset#8": {
+              "matched": true,
+              "value": "0x78",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            }
+          }
+        },
+        "SpawnInfo.ZOffset": {
+          "expected": "0x7c",
+          "got": "0x7c",
+          "passed": true,
+          "unanimous": true,
+          "consistent": true,
+          "discounted": {},
+          "sig_results": {
+            "ZOffset#0": {
+              "matched": true,
+              "value": "0x7c",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "ZOffset#1": {
+              "matched": true,
+              "value": "0x7c",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "ZOffset#2": {
+              "matched": true,
+              "value": "0x7c",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "ZOffset#3": {
+              "matched": true,
+              "value": "0x7c",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "ZOffset#4": {
+              "matched": true,
+              "value": "0x7c",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "ZOffset#5": {
+              "matched": true,
+              "value": "0x7c",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "ZOffset#6": {
+              "matched": true,
+              "value": "0x7c",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "ZOffset#7": {
+              "matched": true,
+              "value": "0x7c",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "ZOffset#8": {
+              "matched": true,
+              "value": "0x7c",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            }
+          }
+        },
+        "SpawnInfo.SpeedOffset": {
+          "expected": "0x8c",
+          "got": "0x8c",
+          "passed": true,
+          "unanimous": false,
+          "consistent": true,
+          "discounted": {},
+          "sig_results": {
+            "SpeedOffset#0": {
+              "matched": false,
+              "value": null,
+              "correct": false,
+              "failure": "no match",
+              "anchor": "root"
+            },
+            "SpeedOffset#1": {
+              "matched": true,
+              "value": "0x8c",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "SpeedOffset#2": {
+              "matched": true,
+              "value": "0x8c",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "SpeedOffset#3": {
+              "matched": true,
+              "value": "0x8c",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "SpeedOffset#4": {
+              "matched": true,
+              "value": "0x8c",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "SpeedOffset#5": {
+              "matched": true,
+              "value": "0x8c",
+              "correct": true,
+              "failure": null,
+              "anchor": "this"
+            },
+            "SpeedOffset#6": {
+              "matched": true,
+              "value": "0x8c",
+              "correct": true,
+              "failure": null,
+              "anchor": "this"
+            },
+            "SpeedOffset#7": {
+              "matched": true,
+              "value": "0x8c",
+              "correct": true,
+              "failure": null,
+              "anchor": "this"
+            },
+            "SpeedOffset#8": {
+              "matched": true,
+              "value": "0x8c",
+              "correct": true,
+              "failure": null,
+              "anchor": "linkseed"
+            }
+          }
+        },
+        "SpawnInfo.HeadingOffset": {
+          "expected": "0x90",
+          "got": "0x90",
+          "passed": true,
+          "unanimous": false,
+          "consistent": true,
+          "discounted": {},
+          "sig_results": {
+            "HeadingOffset#0": {
+              "matched": false,
+              "value": null,
+              "correct": false,
+              "failure": "no match",
+              "anchor": "root"
+            },
+            "HeadingOffset#1": {
+              "matched": true,
+              "value": "0x90",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "HeadingOffset#2": {
+              "matched": true,
+              "value": "0x90",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "HeadingOffset#3": {
+              "matched": false,
+              "value": null,
+              "correct": false,
+              "failure": "no match",
+              "anchor": "root"
+            },
+            "HeadingOffset#4": {
+              "matched": true,
+              "value": "0x90",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "HeadingOffset#5": {
+              "matched": true,
+              "value": "0x90",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "HeadingOffset#6": {
+              "matched": false,
+              "value": null,
+              "correct": false,
+              "failure": "no match",
+              "anchor": "root"
+            },
+            "HeadingOffset#7": {
+              "matched": true,
+              "value": "0x90",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "HeadingOffset#8": {
+              "matched": true,
+              "value": "0x90",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            }
+          }
+        },
+        "SpawnInfo.NameOffset": {
+          "expected": "0xb4",
+          "got": "0xb4",
+          "passed": true,
+          "unanimous": false,
+          "consistent": true,
+          "discounted": {
+            "NameOffset#8": "1"
+          },
+          "sig_results": {
+            "NameOffset#0": {
+              "matched": true,
+              "value": "0xb4",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "NameOffset#1": {
+              "matched": true,
+              "value": "0xb4",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "NameOffset#2": {
+              "matched": true,
+              "value": "0xb4",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "NameOffset#3": {
+              "matched": true,
+              "value": "0xb4",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "NameOffset#4": {
+              "matched": true,
+              "value": "0xb4",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "NameOffset#5": {
+              "matched": true,
+              "value": "0xb4",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "NameOffset#6": {
+              "matched": true,
+              "value": "0xb4",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "NameOffset#7": {
+              "matched": true,
+              "value": "0xb4",
+              "correct": true,
+              "failure": null,
+              "anchor": "this"
+            },
+            "NameOffset#8": {
+              "matched": true,
+              "value": "0x1f6",
+              "correct": false,
+              "failure": null,
+              "anchor": "this"
+            }
+          }
+        },
+        "SpawnInfo.TypeOffset": {
+          "expected": "0x135",
+          "got": "0x135",
+          "passed": true,
+          "unanimous": false,
+          "consistent": true,
+          "discounted": {},
+          "sig_results": {
+            "TypeOffset#0": {
+              "matched": true,
+              "value": "0x135",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "TypeOffset#1": {
+              "matched": true,
+              "value": "0x135",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "TypeOffset#2": {
+              "matched": true,
+              "value": "0x135",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "TypeOffset#3": {
+              "matched": true,
+              "value": "0x135",
+              "correct": true,
+              "failure": null,
+              "anchor": "this"
+            },
+            "TypeOffset#4": {
+              "matched": true,
+              "value": "0x135",
+              "correct": true,
+              "failure": null,
+              "anchor": "this"
+            },
+            "TypeOffset#5": {
+              "matched": false,
+              "value": null,
+              "correct": false,
+              "failure": "no match",
+              "anchor": "this"
+            },
+            "TypeOffset#6": {
+              "matched": true,
+              "value": "0x135",
+              "correct": true,
+              "failure": null,
+              "anchor": "linkseed"
+            },
+            "TypeOffset#7": {
+              "matched": true,
+              "value": "0x135",
+              "correct": true,
+              "failure": null,
+              "anchor": "linkseed"
+            },
+            "TypeOffset#8": {
+              "matched": true,
+              "value": "0x135",
+              "correct": true,
+              "failure": null,
+              "anchor": "linkseed"
+            }
+          }
+        },
+        "SpawnInfo.SpawnIDOffset": {
+          "expected": "0x168",
+          "got": "0x168",
+          "passed": true,
+          "unanimous": false,
+          "consistent": true,
+          "discounted": {},
+          "sig_results": {
+            "SpawnIDOffset#0": {
+              "matched": true,
+              "value": "0x168",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "SpawnIDOffset#1": {
+              "matched": true,
+              "value": "0x168",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "SpawnIDOffset#2": {
+              "matched": true,
+              "value": "0x168",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "SpawnIDOffset#3": {
+              "matched": false,
+              "value": null,
+              "correct": false,
+              "failure": "no match",
+              "anchor": "root"
+            },
+            "SpawnIDOffset#4": {
+              "matched": true,
+              "value": "0x168",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "SpawnIDOffset#5": {
+              "matched": true,
+              "value": "0x168",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "SpawnIDOffset#6": {
+              "matched": true,
+              "value": "0x168",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "SpawnIDOffset#7": {
+              "matched": true,
+              "value": "0x168",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "SpawnIDOffset#8": {
+              "matched": true,
+              "value": "0x168",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            }
+          }
+        },
+        "SpawnInfo.OwnerIDOffset": {
+          "expected": "0x334",
+          "got": "0x334",
+          "passed": true,
+          "unanimous": true,
+          "consistent": true,
+          "discounted": {},
+          "sig_results": {
+            "OwnerIDOffset#0": {
+              "matched": true,
+              "value": "0x334",
+              "correct": true,
+              "failure": null,
+              "anchor": "this"
+            },
+            "OwnerIDOffset#1": {
+              "matched": true,
+              "value": "0x334",
+              "correct": true,
+              "failure": null,
+              "anchor": "this"
+            },
+            "OwnerIDOffset#2": {
+              "matched": true,
+              "value": "0x334",
+              "correct": true,
+              "failure": null,
+              "anchor": "this"
+            },
+            "OwnerIDOffset#3": {
+              "matched": true,
+              "value": "0x334",
+              "correct": true,
+              "failure": null,
+              "anchor": "linkseed"
+            },
+            "OwnerIDOffset#4": {
+              "matched": true,
+              "value": "0x334",
+              "correct": true,
+              "failure": null,
+              "anchor": "linkseed"
+            },
+            "OwnerIDOffset#5": {
+              "matched": true,
+              "value": "0x334",
+              "correct": true,
+              "failure": null,
+              "anchor": "linkseed"
+            },
+            "OwnerIDOffset#6": {
+              "matched": true,
+              "value": "0x334",
+              "correct": true,
+              "failure": null,
+              "anchor": "linkseed"
+            },
+            "OwnerIDOffset#7": {
+              "matched": true,
+              "value": "0x334",
+              "correct": true,
+              "failure": null,
+              "anchor": "linkseed"
+            },
+            "OwnerIDOffset#8": {
+              "matched": true,
+              "value": "0x334",
+              "correct": true,
+              "failure": null,
+              "anchor": "linkseed"
+            }
+          }
+        },
+        "SpawnInfo.HideOffset": {
+          "expected": "0x238",
+          "got": "0x238",
+          "passed": true,
+          "unanimous": true,
+          "consistent": true,
+          "discounted": {},
+          "sig_results": {
+            "HideOffset#0": {
+              "matched": true,
+              "value": "0x238",
+              "correct": true,
+              "failure": null,
+              "anchor": "linkseed"
+            },
+            "HideOffset#1": {
+              "matched": true,
+              "value": "0x238",
+              "correct": true,
+              "failure": null,
+              "anchor": "linkseed"
+            },
+            "HideOffset#2": {
+              "matched": true,
+              "value": "0x238",
+              "correct": true,
+              "failure": null,
+              "anchor": "linkseed"
+            },
+            "HideOffset#3": {
+              "matched": true,
+              "value": "0x238",
+              "correct": true,
+              "failure": null,
+              "anchor": "linkseed"
+            },
+            "HideOffset#4": {
+              "matched": true,
+              "value": "0x238",
+              "correct": true,
+              "failure": null,
+              "anchor": "linkseed"
+            },
+            "HideOffset#5": {
+              "matched": true,
+              "value": "0x238",
+              "correct": true,
+              "failure": null,
+              "anchor": "linkseed"
+            },
+            "HideOffset#6": {
+              "matched": true,
+              "value": "0x238",
+              "correct": true,
+              "failure": null,
+              "anchor": "linkseed"
+            },
+            "HideOffset#7": {
+              "matched": true,
+              "value": "0x238",
+              "correct": true,
+              "failure": null,
+              "anchor": "linkseed"
+            }
+          }
+        },
+        "SpawnInfo.LevelOffset": {
+          "expected": "0x52c",
+          "got": "0x52c",
+          "passed": true,
+          "unanimous": false,
+          "consistent": false,
+          "discounted": {},
+          "sig_results": {
+            "LevelOffset#0": {
+              "matched": false,
+              "value": null,
+              "correct": false,
+              "failure": "no match",
+              "anchor": "root"
+            },
+            "LevelOffset#1": {
+              "matched": false,
+              "value": null,
+              "correct": false,
+              "failure": "no match",
+              "anchor": "root"
+            },
+            "LevelOffset#2": {
+              "matched": true,
+              "value": "0x52c",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "LevelOffset#3": {
+              "matched": true,
+              "value": "0x52c",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "LevelOffset#4": {
+              "matched": true,
+              "value": "0x52c",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "LevelOffset#5": {
+              "matched": true,
+              "value": "0x52c",
+              "correct": true,
+              "failure": null,
+              "anchor": "this"
+            },
+            "LevelOffset#6": {
+              "matched": true,
+              "value": "0x268",
+              "correct": false,
+              "failure": null,
+              "anchor": "this"
+            },
+            "LevelOffset#7": {
+              "matched": false,
+              "value": null,
+              "correct": false,
+              "failure": "no match",
+              "anchor": "linkseed"
+            },
+            "LevelOffset#8": {
+              "matched": false,
+              "value": null,
+              "correct": false,
+              "failure": "no match",
+              "anchor": "linkseed"
+            }
+          }
+        },
+        "SpawnInfo.ClassOffset": {
+          "expected": "0xfe4",
+          "got": "0xfe4",
+          "passed": true,
+          "unanimous": false,
+          "consistent": true,
+          "discounted": {},
+          "sig_results": {
+            "ClassOffset#0": {
+              "matched": true,
+              "value": "0xfe4",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "ClassOffset#1": {
+              "matched": true,
+              "value": "0xfe4",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "ClassOffset#2": {
+              "matched": true,
+              "value": "0xfe4",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "ClassOffset#3": {
+              "matched": false,
+              "value": null,
+              "correct": false,
+              "failure": "no match",
+              "anchor": "root"
+            },
+            "ClassOffset#4": {
+              "matched": true,
+              "value": "0xfe4",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "ClassOffset#5": {
+              "matched": true,
+              "value": "0xfe4",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "ClassOffset#6": {
+              "matched": true,
+              "value": "0xfe4",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "ClassOffset#7": {
+              "matched": true,
+              "value": "0xfe4",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "ClassOffset#8": {
+              "matched": true,
+              "value": "0xfe4",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            }
+          }
+        },
+        "SpawnInfo.RaceOffset": {
+          "expected": "0xfdc",
+          "got": "0xfdc",
+          "passed": true,
+          "unanimous": true,
+          "consistent": true,
+          "discounted": {},
+          "sig_results": {
+            "RaceOffset#0": {
+              "matched": true,
+              "value": "0xfdc",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "RaceOffset#1": {
+              "matched": true,
+              "value": "0xfdc",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "RaceOffset#2": {
+              "matched": true,
+              "value": "0xfdc",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "RaceOffset#3": {
+              "matched": true,
+              "value": "0xfdc",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "RaceOffset#4": {
+              "matched": true,
+              "value": "0xfdc",
+              "correct": true,
+              "failure": null,
+              "anchor": "this"
+            },
+            "RaceOffset#5": {
+              "matched": true,
+              "value": "0xfdc",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "RaceOffset#6": {
+              "matched": true,
+              "value": "0xfdc",
+              "correct": true,
+              "failure": null,
+              "anchor": "this"
+            }
+          }
+        },
+        "SpawnInfo.PrimaryOffset": {
+          "expected": "0x10ec",
+          "got": "0x10ec",
+          "passed": true,
+          "unanimous": true,
+          "consistent": true,
+          "discounted": {},
+          "sig_results": {
+            "PrimaryOffset#0": {
+              "matched": true,
+              "value": "0x10ec",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "PrimaryOffset#1": {
+              "matched": true,
+              "value": "0x10ec",
+              "correct": true,
+              "failure": null,
+              "anchor": "linkseed"
+            }
+          }
+        },
+        "SpawnInfo.OffhandOffset": {
+          "expected": "0x1100",
+          "got": "0x1100",
+          "passed": true,
+          "unanimous": true,
+          "consistent": true,
+          "discounted": {},
+          "sig_results": {
+            "OffhandOffset#0": {
+              "matched": true,
+              "value": "0x1100",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "OffhandOffset#1": {
+              "matched": true,
+              "value": "0x1100",
+              "correct": true,
+              "failure": null,
+              "anchor": "linkseed"
+            }
+          }
+        },
+        "GroundItem.PrevOffset": {
+          "expected": "0x0",
+          "got": "0x0",
+          "passed": true,
+          "unanimous": true,
+          "consistent": true,
+          "discounted": {},
+          "sig_results": {
+            "PrevOffset#0": {
+              "matched": true,
+              "value": "0x0",
+              "correct": true,
+              "failure": null,
+              "anchor": "this"
+            },
+            "PrevOffset#1": {
+              "matched": true,
+              "value": "0x0",
+              "correct": true,
+              "failure": null,
+              "anchor": "linkseed"
+            },
+            "PrevOffset#2": {
+              "matched": true,
+              "value": "0x0",
+              "correct": true,
+              "failure": null,
+              "anchor": "linkseed"
+            },
+            "PrevOffset#3": {
+              "matched": true,
+              "value": "0x0",
+              "correct": true,
+              "failure": null,
+              "anchor": "linkseed"
+            },
+            "PrevOffset#4": {
+              "matched": true,
+              "value": "0x0",
+              "correct": true,
+              "failure": null,
+              "anchor": "linkseed"
+            },
+            "PrevOffset#5": {
+              "matched": true,
+              "value": "0x0",
+              "correct": true,
+              "failure": null,
+              "anchor": "linkseed"
+            },
+            "PrevOffset#6": {
+              "matched": true,
+              "value": "0x0",
+              "correct": true,
+              "failure": null,
+              "anchor": "linkseed"
+            },
+            "PrevOffset#7": {
+              "matched": true,
+              "value": "0x0",
+              "correct": true,
+              "failure": null,
+              "anchor": "linkseed"
+            },
+            "PrevOffset#8": {
+              "matched": true,
+              "value": "0x0",
+              "correct": true,
+              "failure": null,
+              "anchor": "linkseed"
+            }
+          }
+        },
+        "GroundItem.NextOffset": {
+          "expected": "0x8",
+          "got": "0x8",
+          "passed": true,
+          "unanimous": false,
+          "consistent": true,
+          "discounted": {},
+          "sig_results": {
+            "NextOffset#0": {
+              "matched": false,
+              "value": null,
+              "correct": false,
+              "failure": "no match",
+              "anchor": "this"
+            },
+            "NextOffset#1": {
+              "matched": false,
+              "value": null,
+              "correct": false,
+              "failure": "no match",
+              "anchor": "this"
+            },
+            "NextOffset#2": {
+              "matched": false,
+              "value": null,
+              "correct": false,
+              "failure": "ambiguous (3+ matches)",
+              "anchor": "this"
+            },
+            "NextOffset#3": {
+              "matched": true,
+              "value": "0x8",
+              "correct": true,
+              "failure": null,
+              "anchor": "this"
+            },
+            "NextOffset#4": {
+              "matched": true,
+              "value": "0x8",
+              "correct": true,
+              "failure": null,
+              "anchor": "this"
+            },
+            "NextOffset#5": {
+              "matched": false,
+              "value": null,
+              "correct": false,
+              "failure": "no match",
+              "anchor": "this"
+            },
+            "NextOffset#6": {
+              "matched": false,
+              "value": null,
+              "correct": false,
+              "failure": "no match",
+              "anchor": "this"
+            },
+            "NextOffset#7": {
+              "matched": true,
+              "value": "0x8",
+              "correct": true,
+              "failure": null,
+              "anchor": "this"
+            },
+            "NextOffset#8": {
+              "matched": true,
+              "value": "0x8",
+              "correct": true,
+              "failure": null,
+              "anchor": "this"
+            }
+          }
+        },
+        "GroundItem.IdOffset": {
+          "expected": "0x10",
+          "got": "0x10",
+          "passed": true,
+          "unanimous": false,
+          "consistent": true,
+          "discounted": {
+            "IdOffset#0": "4"
+          },
+          "sig_results": {
+            "IdOffset#0": {
+              "matched": true,
+              "value": "0x8",
+              "correct": false,
+              "failure": null,
+              "anchor": "this"
+            },
+            "IdOffset#1": {
+              "matched": true,
+              "value": "0x10",
+              "correct": true,
+              "failure": null,
+              "anchor": "this"
+            },
+            "IdOffset#2": {
+              "matched": true,
+              "value": "0x10",
+              "correct": true,
+              "failure": null,
+              "anchor": "this"
+            },
+            "IdOffset#3": {
+              "matched": true,
+              "value": "0x10",
+              "correct": true,
+              "failure": null,
+              "anchor": "this"
+            },
+            "IdOffset#4": {
+              "matched": true,
+              "value": "0x10",
+              "correct": true,
+              "failure": null,
+              "anchor": "this"
+            },
+            "IdOffset#5": {
+              "matched": true,
+              "value": "0x10",
+              "correct": true,
+              "failure": null,
+              "anchor": "this"
+            },
+            "IdOffset#6": {
+              "matched": true,
+              "value": "0x10",
+              "correct": true,
+              "failure": null,
+              "anchor": "this"
+            },
+            "IdOffset#7": {
+              "matched": true,
+              "value": "0x10",
+              "correct": true,
+              "failure": null,
+              "anchor": "this"
+            },
+            "IdOffset#8": {
+              "matched": true,
+              "value": "0x10",
+              "correct": true,
+              "failure": null,
+              "anchor": "this"
+            }
+          }
+        },
+        "GroundItem.DropIdOffset": {
+          "expected": "0x18",
+          "got": "0x18",
+          "passed": true,
+          "unanimous": false,
+          "consistent": true,
+          "discounted": {},
+          "sig_results": {
+            "DropIdOffset#0": {
+              "matched": true,
+              "value": "0x18",
+              "correct": true,
+              "failure": null,
+              "anchor": "this"
+            },
+            "DropIdOffset#1": {
+              "matched": true,
+              "value": "0x18",
+              "correct": true,
+              "failure": null,
+              "anchor": "this"
+            },
+            "DropIdOffset#2": {
+              "matched": true,
+              "value": "0x18",
+              "correct": true,
+              "failure": null,
+              "anchor": "this"
+            },
+            "DropIdOffset#3": {
+              "matched": false,
+              "value": null,
+              "correct": false,
+              "failure": "no match",
+              "anchor": "this"
+            },
+            "DropIdOffset#4": {
+              "matched": true,
+              "value": "0x18",
+              "correct": true,
+              "failure": null,
+              "anchor": "this"
+            },
+            "DropIdOffset#5": {
+              "matched": false,
+              "value": null,
+              "correct": false,
+              "failure": "no match",
+              "anchor": "this"
+            },
+            "DropIdOffset#6": {
+              "matched": true,
+              "value": "0x18",
+              "correct": true,
+              "failure": null,
+              "anchor": "this"
+            },
+            "DropIdOffset#7": {
+              "matched": true,
+              "value": "0x18",
+              "correct": true,
+              "failure": null,
+              "anchor": "this"
+            },
+            "DropIdOffset#8": {
+              "matched": true,
+              "value": "0x18",
+              "correct": true,
+              "failure": null,
+              "anchor": "this"
+            }
+          }
+        },
+        "GroundItem.XOffset": {
+          "expected": "0x8c",
+          "got": "0x8c",
+          "passed": true,
+          "unanimous": true,
+          "consistent": true,
+          "discounted": {},
+          "sig_results": {
+            "XOffset#0": {
+              "matched": true,
+              "value": "0x8c",
+              "correct": true,
+              "failure": null,
+              "anchor": "linkseed"
+            },
+            "XOffset#1": {
+              "matched": true,
+              "value": "0x8c",
+              "correct": true,
+              "failure": null,
+              "anchor": "linkseed"
+            },
+            "XOffset#2": {
+              "matched": true,
+              "value": "0x8c",
+              "correct": true,
+              "failure": null,
+              "anchor": "linkseed"
+            },
+            "XOffset#3": {
+              "matched": true,
+              "value": "0x8c",
+              "correct": true,
+              "failure": null,
+              "anchor": "linkseed"
+            },
+            "XOffset#4": {
+              "matched": true,
+              "value": "0x8c",
+              "correct": true,
+              "failure": null,
+              "anchor": "linkseed"
+            },
+            "XOffset#5": {
+              "matched": true,
+              "value": "0x8c",
+              "correct": true,
+              "failure": null,
+              "anchor": "linkseed"
+            }
+          }
+        },
+        "GroundItem.YOffset": {
+          "expected": "0x90",
+          "got": "0x90",
+          "passed": true,
+          "unanimous": false,
+          "consistent": false,
+          "discounted": {},
+          "sig_results": {
+            "YOffset#0": {
+              "matched": false,
+              "value": null,
+              "correct": false,
+              "failure": "no match",
+              "anchor": "this"
+            },
+            "YOffset#1": {
+              "matched": true,
+              "value": "0x98",
+              "correct": false,
+              "failure": null,
+              "anchor": "this"
+            },
+            "YOffset#2": {
+              "matched": true,
+              "value": "0x90",
+              "correct": true,
+              "failure": null,
+              "anchor": "this"
+            },
+            "YOffset#3": {
+              "matched": false,
+              "value": null,
+              "correct": false,
+              "failure": "no match",
+              "anchor": "this"
+            },
+            "YOffset#4": {
+              "matched": false,
+              "value": null,
+              "correct": false,
+              "failure": "no match",
+              "anchor": "this"
+            },
+            "YOffset#5": {
+              "matched": false,
+              "value": null,
+              "correct": false,
+              "failure": "no match",
+              "anchor": "this"
+            },
+            "YOffset#6": {
+              "matched": true,
+              "value": "0x90",
+              "correct": true,
+              "failure": null,
+              "anchor": "this"
+            },
+            "YOffset#7": {
+              "matched": true,
+              "value": "0x98",
+              "correct": false,
+              "failure": null,
+              "anchor": "this"
+            },
+            "YOffset#8": {
+              "matched": true,
+              "value": "0x90",
+              "correct": true,
+              "failure": null,
+              "anchor": "this"
+            }
+          }
+        },
+        "GroundItem.ZOffset": {
+          "expected": "0x94",
+          "got": "0x94",
+          "passed": true,
+          "unanimous": true,
+          "consistent": true,
+          "discounted": {},
+          "sig_results": {
+            "ZOffset#0": {
+              "matched": true,
+              "value": "0x94",
+              "correct": true,
+              "failure": null,
+              "anchor": "linkseed"
+            }
+          }
+        },
+        "GroundItem.NameOffset": {
+          "expected": "0x38",
+          "got": "0x38",
+          "passed": true,
+          "unanimous": false,
+          "consistent": true,
+          "discounted": {},
+          "sig_results": {
+            "NameOffset#0": {
+              "matched": true,
+              "value": "0x38",
+              "correct": true,
+              "failure": null,
+              "anchor": "link"
+            },
+            "NameOffset#1": {
+              "matched": true,
+              "value": "0x38",
+              "correct": true,
+              "failure": null,
+              "anchor": "link"
+            },
+            "NameOffset#2": {
+              "matched": false,
+              "value": null,
+              "correct": false,
+              "failure": "no match",
+              "anchor": "this"
+            },
+            "NameOffset#3": {
+              "matched": false,
+              "value": null,
+              "correct": false,
+              "failure": "no match",
+              "anchor": "this"
+            },
+            "NameOffset#4": {
+              "matched": false,
+              "value": null,
+              "correct": false,
+              "failure": "no match",
+              "anchor": "this"
+            },
+            "NameOffset#5": {
+              "matched": true,
+              "value": "0x38",
+              "correct": true,
+              "failure": null,
+              "anchor": "this"
+            },
+            "NameOffset#6": {
+              "matched": true,
+              "value": "0x38",
+              "correct": true,
+              "failure": null,
+              "anchor": "this"
+            },
+            "NameOffset#7": {
+              "matched": false,
+              "value": null,
+              "correct": false,
+              "failure": "no match",
+              "anchor": "this"
+            },
+            "NameOffset#8": {
+              "matched": true,
+              "value": "0x38",
+              "correct": true,
+              "failure": null,
+              "anchor": "this"
+            }
+          }
+        },
+        "WorldInfo.WorldHourOffset": {
+          "expected": "8",
+          "got": "8",
+          "passed": true,
+          "unanimous": true,
+          "consistent": true,
+          "discounted": {},
+          "sig_results": {
+            "WorldHourOffset#0": {
+              "matched": true,
+              "value": "8",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "WorldHourOffset#1": {
+              "matched": true,
+              "value": "8",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "WorldHourOffset#2": {
+              "matched": true,
+              "value": "8",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "WorldHourOffset#3": {
+              "matched": true,
+              "value": "8",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "WorldHourOffset#4": {
+              "matched": true,
+              "value": "8",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "WorldHourOffset#5": {
+              "matched": true,
+              "value": "8",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "WorldHourOffset#6": {
+              "matched": true,
+              "value": "8",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "WorldHourOffset#7": {
+              "matched": true,
+              "value": "8",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "WorldHourOffset#8": {
+              "matched": true,
+              "value": "8",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            }
+          }
+        },
+        "WorldInfo.WorldMinuteOffset": {
+          "expected": "9",
+          "got": "9",
+          "passed": true,
+          "unanimous": true,
+          "consistent": true,
+          "discounted": {},
+          "sig_results": {
+            "WorldMinuteOffset#0": {
+              "matched": true,
+              "value": "9",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "WorldMinuteOffset#1": {
+              "matched": true,
+              "value": "9",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "WorldMinuteOffset#2": {
+              "matched": true,
+              "value": "9",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "WorldMinuteOffset#3": {
+              "matched": true,
+              "value": "9",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "WorldMinuteOffset#4": {
+              "matched": true,
+              "value": "9",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "WorldMinuteOffset#5": {
+              "matched": true,
+              "value": "9",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            },
+            "WorldMinuteOffset#6": {
+              "matched": true,
+              "value": "9",
+              "correct": true,
+              "failure": null,
+              "anchor": "root"
+            }
+          }
+        },
+        "WorldInfo.WorldDayOffset": {
+          "expected": "10",
+          "got": "10",
+          "passed": true,
+          "unanimous": true,
+          "consistent": true,
+          "discounted": {},
+          "sig_results": {
+            "WorldDayOffset#0": {
+              "matched": true,
+              "value": "10",
+              "correct": true,
+              "failure": null,
+              "anchor": "this"
+            }
+          }
+        },
+        "WorldInfo.WorldMonthOffset": {
+          "expected": "11",
+          "got": "11",
+          "passed": true,
+          "unanimous": true,
+          "consistent": true,
+          "discounted": {},
+          "sig_results": {
+            "WorldMonthOffset#0": {
+              "matched": true,
+              "value": "11",
+              "correct": true,
+              "failure": null,
+              "anchor": "this"
+            }
+          }
+        },
+        "WorldInfo.WorldYearOffset": {
+          "expected": "12",
+          "got": "12",
+          "passed": true,
+          "unanimous": true,
+          "consistent": true,
+          "discounted": {},
           "sig_results": {
             "WorldYearOffset#0": {
               "matched": true,
@@ -4205,755 +6424,755 @@
   "survival": {
     "ZoneAddr": {
       "ZoneAddr#0": {
-        "tested": 2,
-        "passed": 1,
-        "rate": 0.5
+        "tested": 3,
+        "passed": 2,
+        "rate": 0.6666666666666666
       },
       "ZoneAddr#1": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "ZoneAddr#2": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "ZoneAddr#3": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "ZoneAddr#4": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       }
     },
     "SpawnHeaderAddr": {
       "SpawnHeaderAddr#0": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "SpawnHeaderAddr#1": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "SpawnHeaderAddr#2": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "SpawnHeaderAddr#3": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "SpawnHeaderAddr#4": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       }
     },
     "CharInfo": {
       "CharInfo#0": {
-        "tested": 2,
+        "tested": 3,
         "passed": 0,
         "rate": 0.0
       },
       "CharInfo#1": {
-        "tested": 2,
+        "tested": 3,
         "passed": 0,
         "rate": 0.0
       },
       "CharInfo#2": {
-        "tested": 2,
+        "tested": 3,
         "passed": 0,
         "rate": 0.0
       },
       "CharInfo#3": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "CharInfo#4": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       }
     },
     "TargetAddr": {
       "TargetAddr#0": {
-        "tested": 2,
+        "tested": 3,
         "passed": 0,
         "rate": 0.0
       },
       "TargetAddr#1": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "TargetAddr#2": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       }
     },
     "ItemsAddr": {
       "ItemsAddr#0": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "ItemsAddr#1": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "ItemsAddr#2": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "ItemsAddr#3": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       }
     },
     "WorldAddr": {
       "WorldAddr#0": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "WorldAddr#1": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "WorldAddr#2": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "WorldAddr#3": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "WorldAddr#4": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       }
     },
     "SpawnInfo.NextOffset": {
       "NextOffset#0": {
-        "tested": 2,
+        "tested": 3,
         "passed": 0,
         "rate": 0.0
       },
       "NextOffset#1": {
-        "tested": 2,
+        "tested": 3,
         "passed": 0,
         "rate": 0.0
       },
       "NextOffset#2": {
-        "tested": 2,
+        "tested": 3,
         "passed": 2,
-        "rate": 1.0
+        "rate": 0.6666666666666666
       },
       "NextOffset#3": {
-        "tested": 2,
-        "passed": 0,
-        "rate": 0.0
+        "tested": 3,
+        "passed": 1,
+        "rate": 0.3333333333333333
       },
       "NextOffset#4": {
-        "tested": 2,
+        "tested": 3,
         "passed": 0,
         "rate": 0.0
       },
       "NextOffset#5": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "NextOffset#6": {
-        "tested": 2,
+        "tested": 3,
         "passed": 0,
         "rate": 0.0
       },
       "NextOffset#7": {
-        "tested": 2,
+        "tested": 3,
         "passed": 0,
         "rate": 0.0
       },
       "NextOffset#8": {
-        "tested": 2,
+        "tested": 3,
         "passed": 0,
         "rate": 0.0
       }
     },
     "SpawnInfo.PrevOffset": {
       "PrevOffset#0": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "PrevOffset#1": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "PrevOffset#2": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "PrevOffset#3": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "PrevOffset#4": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "PrevOffset#5": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "PrevOffset#6": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "PrevOffset#7": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "PrevOffset#8": {
-        "tested": 2,
+        "tested": 3,
         "passed": 0,
         "rate": 0.0
       }
     },
     "SpawnInfo.LastnameOffset": {
       "LastnameOffset#0": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "LastnameOffset#1": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "LastnameOffset#2": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "LastnameOffset#3": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "LastnameOffset#4": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "LastnameOffset#5": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "LastnameOffset#6": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "LastnameOffset#7": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "LastnameOffset#8": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       }
     },
     "SpawnInfo.XOffset": {
       "XOffset#0": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "XOffset#1": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "XOffset#2": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "XOffset#3": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "XOffset#4": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "XOffset#5": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "XOffset#6": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "XOffset#7": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "XOffset#8": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       }
     },
     "SpawnInfo.YOffset": {
       "YOffset#0": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "YOffset#1": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "YOffset#2": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "YOffset#3": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "YOffset#4": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "YOffset#5": {
-        "tested": 2,
+        "tested": 3,
         "passed": 0,
         "rate": 0.0
       },
       "YOffset#6": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "YOffset#7": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "YOffset#8": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       }
     },
     "SpawnInfo.ZOffset": {
       "ZOffset#0": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "ZOffset#1": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "ZOffset#2": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "ZOffset#3": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "ZOffset#4": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "ZOffset#5": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "ZOffset#6": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "ZOffset#7": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "ZOffset#8": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       }
     },
     "SpawnInfo.SpeedOffset": {
       "SpeedOffset#0": {
-        "tested": 2,
+        "tested": 3,
         "passed": 0,
         "rate": 0.0
       },
       "SpeedOffset#1": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "SpeedOffset#2": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "SpeedOffset#3": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "SpeedOffset#4": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "SpeedOffset#5": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "SpeedOffset#6": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "SpeedOffset#7": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "SpeedOffset#8": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       }
     },
     "SpawnInfo.HeadingOffset": {
       "HeadingOffset#0": {
-        "tested": 2,
+        "tested": 3,
         "passed": 0,
         "rate": 0.0
       },
       "HeadingOffset#1": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "HeadingOffset#2": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "HeadingOffset#3": {
-        "tested": 2,
+        "tested": 3,
         "passed": 0,
         "rate": 0.0
       },
       "HeadingOffset#4": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "HeadingOffset#5": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "HeadingOffset#6": {
-        "tested": 2,
+        "tested": 3,
         "passed": 0,
         "rate": 0.0
       },
       "HeadingOffset#7": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "HeadingOffset#8": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       }
     },
     "SpawnInfo.NameOffset": {
       "NameOffset#0": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "NameOffset#1": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "NameOffset#2": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "NameOffset#3": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "NameOffset#4": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "NameOffset#5": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "NameOffset#6": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "NameOffset#7": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "NameOffset#8": {
-        "tested": 2,
+        "tested": 3,
         "passed": 2,
-        "rate": 1.0
+        "rate": 0.6666666666666666
       }
     },
     "SpawnInfo.TypeOffset": {
       "TypeOffset#0": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "TypeOffset#1": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "TypeOffset#2": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "TypeOffset#3": {
-        "tested": 2,
-        "passed": 0,
-        "rate": 0.0
+        "tested": 3,
+        "passed": 1,
+        "rate": 0.3333333333333333
       },
       "TypeOffset#4": {
-        "tested": 2,
-        "passed": 0,
-        "rate": 0.0
+        "tested": 3,
+        "passed": 1,
+        "rate": 0.3333333333333333
       },
       "TypeOffset#5": {
-        "tested": 2,
+        "tested": 3,
         "passed": 0,
         "rate": 0.0
       },
       "TypeOffset#6": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "TypeOffset#7": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "TypeOffset#8": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       }
     },
     "SpawnInfo.SpawnIDOffset": {
       "SpawnIDOffset#0": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "SpawnIDOffset#1": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "SpawnIDOffset#2": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "SpawnIDOffset#3": {
-        "tested": 2,
+        "tested": 3,
         "passed": 0,
         "rate": 0.0
       },
       "SpawnIDOffset#4": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "SpawnIDOffset#5": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "SpawnIDOffset#6": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "SpawnIDOffset#7": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "SpawnIDOffset#8": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       }
     },
     "SpawnInfo.OwnerIDOffset": {
       "OwnerIDOffset#0": {
-        "tested": 2,
-        "passed": 0,
-        "rate": 0.0
+        "tested": 3,
+        "passed": 1,
+        "rate": 0.3333333333333333
       },
       "OwnerIDOffset#1": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "OwnerIDOffset#2": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "OwnerIDOffset#3": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "OwnerIDOffset#4": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "OwnerIDOffset#5": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "OwnerIDOffset#6": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "OwnerIDOffset#7": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "OwnerIDOffset#8": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       }
     },
     "SpawnInfo.HideOffset": {
       "HideOffset#0": {
-        "tested": 2,
-        "passed": 1,
-        "rate": 0.5
+        "tested": 3,
+        "passed": 2,
+        "rate": 0.6666666666666666
       },
       "HideOffset#1": {
-        "tested": 2,
-        "passed": 1,
-        "rate": 0.5
+        "tested": 3,
+        "passed": 2,
+        "rate": 0.6666666666666666
       },
       "HideOffset#2": {
-        "tested": 2,
-        "passed": 1,
-        "rate": 0.5
+        "tested": 3,
+        "passed": 2,
+        "rate": 0.6666666666666666
       },
       "HideOffset#3": {
-        "tested": 2,
-        "passed": 1,
-        "rate": 0.5
+        "tested": 3,
+        "passed": 2,
+        "rate": 0.6666666666666666
       },
       "HideOffset#4": {
-        "tested": 2,
-        "passed": 1,
-        "rate": 0.5
+        "tested": 3,
+        "passed": 2,
+        "rate": 0.6666666666666666
       },
       "HideOffset#5": {
-        "tested": 2,
-        "passed": 1,
-        "rate": 0.5
+        "tested": 3,
+        "passed": 2,
+        "rate": 0.6666666666666666
       },
       "HideOffset#6": {
-        "tested": 2,
-        "passed": 1,
-        "rate": 0.5
+        "tested": 3,
+        "passed": 2,
+        "rate": 0.6666666666666666
       },
       "HideOffset#7": {
-        "tested": 2,
-        "passed": 1,
-        "rate": 0.5
+        "tested": 3,
+        "passed": 2,
+        "rate": 0.6666666666666666
       },
       "HideOffset#8": {
         "tested": 1,
@@ -4963,616 +7182,616 @@
     },
     "SpawnInfo.LevelOffset": {
       "LevelOffset#0": {
-        "tested": 2,
+        "tested": 3,
         "passed": 0,
         "rate": 0.0
       },
       "LevelOffset#1": {
-        "tested": 2,
+        "tested": 3,
         "passed": 0,
         "rate": 0.0
       },
       "LevelOffset#2": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "LevelOffset#3": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "LevelOffset#4": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "LevelOffset#5": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "LevelOffset#6": {
-        "tested": 1,
+        "tested": 2,
         "passed": 0,
         "rate": 0.0
       },
       "LevelOffset#7": {
-        "tested": 1,
+        "tested": 2,
         "passed": 0,
         "rate": 0.0
       },
       "LevelOffset#8": {
-        "tested": 1,
+        "tested": 2,
         "passed": 0,
         "rate": 0.0
       }
     },
     "SpawnInfo.ClassOffset": {
       "ClassOffset#0": {
-        "tested": 2,
-        "passed": 0,
-        "rate": 0.0
+        "tested": 3,
+        "passed": 1,
+        "rate": 0.3333333333333333
       },
       "ClassOffset#1": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "ClassOffset#2": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "ClassOffset#3": {
-        "tested": 2,
+        "tested": 3,
         "passed": 0,
         "rate": 0.0
       },
       "ClassOffset#4": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "ClassOffset#5": {
-        "tested": 2,
-        "passed": 0,
-        "rate": 0.0
+        "tested": 3,
+        "passed": 1,
+        "rate": 0.3333333333333333
       },
       "ClassOffset#6": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "ClassOffset#7": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "ClassOffset#8": {
-        "tested": 2,
-        "passed": 0,
-        "rate": 0.0
+        "tested": 3,
+        "passed": 1,
+        "rate": 0.3333333333333333
       }
     },
     "SpawnInfo.RaceOffset": {
       "RaceOffset#0": {
-        "tested": 2,
-        "passed": 0,
-        "rate": 0.0
+        "tested": 3,
+        "passed": 1,
+        "rate": 0.3333333333333333
       },
       "RaceOffset#1": {
-        "tested": 2,
-        "passed": 0,
-        "rate": 0.0
+        "tested": 3,
+        "passed": 1,
+        "rate": 0.3333333333333333
       },
       "RaceOffset#2": {
-        "tested": 2,
-        "passed": 0,
-        "rate": 0.0
+        "tested": 3,
+        "passed": 1,
+        "rate": 0.3333333333333333
       },
       "RaceOffset#3": {
-        "tested": 2,
-        "passed": 0,
-        "rate": 0.0
+        "tested": 3,
+        "passed": 1,
+        "rate": 0.3333333333333333
       },
       "RaceOffset#4": {
-        "tested": 2,
-        "passed": 0,
-        "rate": 0.0
+        "tested": 3,
+        "passed": 1,
+        "rate": 0.3333333333333333
       },
       "RaceOffset#5": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "RaceOffset#6": {
-        "tested": 2,
-        "passed": 0,
-        "rate": 0.0
+        "tested": 3,
+        "passed": 1,
+        "rate": 0.3333333333333333
       }
     },
     "SpawnInfo.PrimaryOffset": {
       "PrimaryOffset#0": {
-        "tested": 2,
-        "passed": 0,
-        "rate": 0.0
+        "tested": 3,
+        "passed": 1,
+        "rate": 0.3333333333333333
       },
       "PrimaryOffset#1": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       }
     },
     "SpawnInfo.OffhandOffset": {
       "OffhandOffset#0": {
-        "tested": 2,
-        "passed": 0,
-        "rate": 0.0
+        "tested": 3,
+        "passed": 1,
+        "rate": 0.3333333333333333
       },
       "OffhandOffset#1": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       }
     },
     "GroundItem.PrevOffset": {
       "PrevOffset#0": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "PrevOffset#1": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "PrevOffset#2": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "PrevOffset#3": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "PrevOffset#4": {
-        "tested": 2,
-        "passed": 1,
-        "rate": 0.5
+        "tested": 3,
+        "passed": 2,
+        "rate": 0.6666666666666666
       },
       "PrevOffset#5": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "PrevOffset#6": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "PrevOffset#7": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "PrevOffset#8": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       }
     },
     "GroundItem.NextOffset": {
       "NextOffset#0": {
-        "tested": 2,
+        "tested": 3,
         "passed": 0,
         "rate": 0.0
       },
       "NextOffset#1": {
-        "tested": 2,
+        "tested": 3,
         "passed": 2,
-        "rate": 1.0
+        "rate": 0.6666666666666666
       },
       "NextOffset#2": {
-        "tested": 2,
+        "tested": 3,
         "passed": 0,
         "rate": 0.0
       },
       "NextOffset#3": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "NextOffset#4": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "NextOffset#5": {
-        "tested": 2,
+        "tested": 3,
         "passed": 0,
         "rate": 0.0
       },
       "NextOffset#6": {
-        "tested": 2,
+        "tested": 3,
         "passed": 0,
         "rate": 0.0
       },
       "NextOffset#7": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "NextOffset#8": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       }
     },
     "GroundItem.IdOffset": {
       "IdOffset#0": {
-        "tested": 2,
+        "tested": 3,
         "passed": 2,
-        "rate": 1.0
+        "rate": 0.6666666666666666
       },
       "IdOffset#1": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "IdOffset#2": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "IdOffset#3": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "IdOffset#4": {
-        "tested": 2,
-        "passed": 1,
-        "rate": 0.5
+        "tested": 3,
+        "passed": 2,
+        "rate": 0.6666666666666666
       },
       "IdOffset#5": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "IdOffset#6": {
-        "tested": 2,
-        "passed": 1,
-        "rate": 0.5
+        "tested": 3,
+        "passed": 2,
+        "rate": 0.6666666666666666
       },
       "IdOffset#7": {
-        "tested": 2,
-        "passed": 1,
-        "rate": 0.5
+        "tested": 3,
+        "passed": 2,
+        "rate": 0.6666666666666666
       },
       "IdOffset#8": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       }
     },
     "GroundItem.DropIdOffset": {
       "DropIdOffset#0": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "DropIdOffset#1": {
-        "tested": 2,
-        "passed": 1,
-        "rate": 0.5
+        "tested": 3,
+        "passed": 2,
+        "rate": 0.6666666666666666
       },
       "DropIdOffset#2": {
-        "tested": 2,
-        "passed": 1,
-        "rate": 0.5
+        "tested": 3,
+        "passed": 2,
+        "rate": 0.6666666666666666
       },
       "DropIdOffset#3": {
-        "tested": 2,
+        "tested": 3,
         "passed": 1,
-        "rate": 0.5
+        "rate": 0.3333333333333333
       },
       "DropIdOffset#4": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "DropIdOffset#5": {
-        "tested": 2,
+        "tested": 3,
         "passed": 0,
         "rate": 0.0
       },
       "DropIdOffset#6": {
-        "tested": 2,
-        "passed": 1,
-        "rate": 0.5
+        "tested": 3,
+        "passed": 2,
+        "rate": 0.6666666666666666
       },
       "DropIdOffset#7": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "DropIdOffset#8": {
-        "tested": 2,
-        "passed": 1,
-        "rate": 0.5
+        "tested": 3,
+        "passed": 2,
+        "rate": 0.6666666666666666
       }
     },
     "GroundItem.XOffset": {
       "XOffset#0": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "XOffset#1": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "XOffset#2": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "XOffset#3": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "XOffset#4": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "XOffset#5": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       }
     },
     "GroundItem.YOffset": {
       "YOffset#0": {
-        "tested": 2,
+        "tested": 3,
         "passed": 1,
-        "rate": 0.5
+        "rate": 0.3333333333333333
       },
       "YOffset#1": {
-        "tested": 2,
+        "tested": 3,
         "passed": 2,
-        "rate": 1.0
+        "rate": 0.6666666666666666
       },
       "YOffset#2": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "YOffset#3": {
-        "tested": 2,
+        "tested": 3,
         "passed": 1,
-        "rate": 0.5
+        "rate": 0.3333333333333333
       },
       "YOffset#4": {
-        "tested": 2,
+        "tested": 3,
         "passed": 2,
-        "rate": 1.0
+        "rate": 0.6666666666666666
       },
       "YOffset#5": {
-        "tested": 2,
+        "tested": 3,
         "passed": 2,
-        "rate": 1.0
+        "rate": 0.6666666666666666
       },
       "YOffset#6": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "YOffset#7": {
-        "tested": 2,
+        "tested": 3,
         "passed": 2,
-        "rate": 1.0
+        "rate": 0.6666666666666666
       },
       "YOffset#8": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       }
     },
     "GroundItem.ZOffset": {
       "ZOffset#0": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       }
     },
     "GroundItem.NameOffset": {
       "NameOffset#0": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "NameOffset#1": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "NameOffset#2": {
-        "tested": 2,
+        "tested": 3,
         "passed": 0,
         "rate": 0.0
       },
       "NameOffset#3": {
-        "tested": 2,
+        "tested": 3,
         "passed": 0,
         "rate": 0.0
       },
       "NameOffset#4": {
-        "tested": 2,
+        "tested": 3,
         "passed": 0,
         "rate": 0.0
       },
       "NameOffset#5": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "NameOffset#6": {
-        "tested": 2,
-        "passed": 1,
-        "rate": 0.5
+        "tested": 3,
+        "passed": 2,
+        "rate": 0.6666666666666666
       },
       "NameOffset#7": {
-        "tested": 2,
+        "tested": 3,
         "passed": 2,
-        "rate": 1.0
+        "rate": 0.6666666666666666
       },
       "NameOffset#8": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       }
     },
     "WorldInfo.WorldHourOffset": {
       "WorldHourOffset#0": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "WorldHourOffset#1": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "WorldHourOffset#2": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "WorldHourOffset#3": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "WorldHourOffset#4": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "WorldHourOffset#5": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "WorldHourOffset#6": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "WorldHourOffset#7": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "WorldHourOffset#8": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       }
     },
     "WorldInfo.WorldMinuteOffset": {
       "WorldMinuteOffset#0": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "WorldMinuteOffset#1": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "WorldMinuteOffset#2": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "WorldMinuteOffset#3": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "WorldMinuteOffset#4": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "WorldMinuteOffset#5": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       },
       "WorldMinuteOffset#6": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       }
     },
     "WorldInfo.WorldDayOffset": {
       "WorldDayOffset#0": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       }
     },
     "WorldInfo.WorldMonthOffset": {
       "WorldMonthOffset#0": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       }
     },
     "WorldInfo.WorldYearOffset": {
       "WorldYearOffset#0": {
-        "tested": 2,
-        "passed": 2,
+        "tested": 3,
+        "passed": 3,
         "rate": 1.0
       }
     }
   },
   "anchor_survival": {
     "rip_global": {
-      "tested": 54,
-      "matched": 45,
-      "passed": 45,
-      "rate": 0.8333333333333334
+      "tested": 81,
+      "matched": 68,
+      "passed": 68,
+      "rate": 0.8395061728395061
     },
     "this": {
-      "tested": 159,
-      "matched": 104,
-      "passed": 101,
-      "rate": 0.6352201257861635
+      "tested": 241,
+      "matched": 162,
+      "passed": 154,
+      "rate": 0.6390041493775933
     },
     "link": {
-      "tested": 8,
-      "matched": 8,
-      "passed": 8,
+      "tested": 12,
+      "matched": 12,
+      "passed": 12,
       "rate": 1.0
     },
     "root": {
-      "tested": 204,
-      "matched": 169,
-      "passed": 168,
-      "rate": 0.8235294117647058
+      "tested": 306,
+      "matched": 262,
+      "passed": 261,
+      "rate": 0.8529411764705882
     },
     "linkseed": {
-      "tested": 77,
-      "matched": 72,
-      "passed": 68,
-      "rate": 0.8831168831168831
+      "tested": 114,
+      "matched": 107,
+      "passed": 103,
+      "rate": 0.9035087719298246
     }
   }
 }
